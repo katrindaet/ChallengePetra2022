@@ -18,37 +18,30 @@ class Window(QMainWindow, Ui_MainWindow):
         super().__init__(parent)
         self.setupUi(self)
         self.mytts = tts.TTS()
-        text_font = QFont("Arial", 20)
-        display_font = QFont("Arial", 24)
+        self.text_font = QFont("Arial", 20)
+        self.display_font = QFont("Arial", 24)
         # set font color
-        text_font.setBold(True)
-        display_font.setBold(True)
+        self.text_font.setBold(True)
+        self.display_font.setBold(True)
 
         # change the font of the textedit
-        self.textEdit.setFont(display_font)
+        self.textEdit.setFont(self.display_font)
         # max size of the textedit
         self.textEdit.setMaximumSize(QtCore.QSize(16777215, 450))
 
 
 
         for i in range(12):
-            b1 = QPushButton("Suggestions very very \n very very very very long")
-            b1.setFont(text_font)
-            # make the buttom expand
-            b1.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-            # background color of the buttom
-            # b1.setStyleSheet("background-color: rgb(120, 120, 120);")
+            b1 = self.button_initialiser("Suggestions very very \n very very very very long")
             y = i % 3
             x = math.floor(i/3)
             self.gridLayout1.addWidget(b1,x,y)
-            # wrap botton words in python
-            # when b1 is clicked append vertically the name of the botton in the textedit
-            b1.clicked.connect(lambda state, b1=b1: self.textEdit.append(b1.text()))
+
 
 
         for i in range(6):
             b1 = QPushButton("Themes")
-            b1.setFont(text_font)
+            b1.setFont(self.text_font)
             b1.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
             b1.setMaximumWidth(400)
             y = i % 2
@@ -59,7 +52,7 @@ class Window(QMainWindow, Ui_MainWindow):
 
         for i in range(4):
             b1 = QPushButton("Custom")
-            b1.setFont(text_font)
+            b1.setFont(self.text_font)
             b1.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
             # max width of the button
             b1.setMaximumWidth(400)
@@ -126,7 +119,15 @@ class Window(QMainWindow, Ui_MainWindow):
             for i in reversed(range(self.gridLayout1.count())):
                 self.gridLayout1.itemAt(i).widget().setParent(None)
             # read the database
-            
+
+    def button_initialiser(self,text):
+        b = QPushButton(text)
+        b.clicked.connect(lambda state, b=b: self.textEdit.append(b.text()))
+        b.setFont(self.text_font)
+        # make the buttom expand
+        b.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        return b
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
