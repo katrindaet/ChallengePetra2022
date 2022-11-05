@@ -29,17 +29,19 @@ class Window(QMainWindow, Ui_MainWindow):
         # max size of the textedit
         self.textEdit.setMaximumSize(QtCore.QSize(16777215, 450))
 
+
+
         for i in range(12):
-            b1 = QPushButton("Suggestions")
+            b1 = QPushButton("Suggestions very very \n very very very very long")
             b1.setFont(text_font)
             # make the buttom expand
             b1.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
             # background color of the buttom
-            b1.setStyleSheet("background-color: rgb(120, 120, 120);")
+            # b1.setStyleSheet("background-color: rgb(120, 120, 120);")
             y = i % 3
             x = math.floor(i/3)
             self.gridLayout1.addWidget(b1,x,y)
-
+            # wrap botton words in python
             # when b1 is clicked append vertically the name of the botton in the textedit
             b1.clicked.connect(lambda state, b1=b1: self.textEdit.append(b1.text()))
 
@@ -48,27 +50,25 @@ class Window(QMainWindow, Ui_MainWindow):
             b1 = QPushButton("Themes")
             b1.setFont(text_font)
             b1.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-            b1.setMaximumWidth(300)
+            b1.setMaximumWidth(400)
             y = i % 2
             x = math.floor(i/2)
             self.gridLayout2.addWidget(b1,x,y)
-            
             # background color of the buttom
-            b1.setStyleSheet("background-color: rgb(0, 60, 120);")
+            # b1.setStyleSheet("background-color: rgb(0, 60, 120);")
 
         for i in range(4):
             b1 = QPushButton("Custom")
             b1.setFont(text_font)
             b1.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
             # max width of the button
-            b1.setMaximumWidth(300)
+            b1.setMaximumWidth(400)
 
             y = i % 2
             x = math.floor(i/2)
             self.gridLayout3.addWidget(b1,x,y)
-
             # background color of the buttom
-            b1.setStyleSheet("background-color: rgb(120, 60, 0);")
+            # b1.setStyleSheet("background-color: rgb(120, 60, 0);")
 
         # add icons in settings
         icon = QIcon(".\icons_gui\delete.png")
@@ -83,15 +83,25 @@ class Window(QMainWindow, Ui_MainWindow):
         self.Setting6.setIcon(icon)
         icon = QIcon(".\icons_gui\speaker.png")
         self.Setting1.setIcon(icon)
+
         def play_sound():
             # save text in new variable
             text = self.textEdit.toPlainText()
-            self.textEdit.clear()
+            # self.textEdit.clear()
             self.mytts.say(text)
-            # clear the textedit
-            
+        
+        def erase():
+            self.textEdit.clear()
+            # self.initiate_custom_buttons()
+
+
+
         # when setting1 is clicked play the content of textedit
         self.Setting1.clicked.connect(lambda state, self=self: play_sound())
+
+        # when setting3 is clicked clear the textedit
+        self.Setting3.clicked.connect(lambda state, self=self: erase())
+
 
         # > mytts = tts.TTS()
 # > mytts.say('Hello, World')
@@ -109,6 +119,14 @@ class Window(QMainWindow, Ui_MainWindow):
 
         # adapt size of icon
         self.Setting2.setIconSize(QtCore.QSize(100, 100))
+
+
+    def initiate_custom_buttons(self):
+            # erase content of the gridlayout1
+            for i in reversed(range(self.gridLayout1.count())):
+                self.gridLayout1.itemAt(i).widget().setParent(None)
+            # read the database
+            
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
