@@ -51,14 +51,16 @@ class Window(QMainWindow, Ui_MainWindow):
         # max size of the textedit
         self.textEdit.setMaximumSize(QtCore.QSize(16777215, 450))
 
+        
 
         # read context from the database
         self.db = Database('sentences.json')
 
         self.contexts = self.db.contexts()
 
+        self.current_context = self.contexts[0]
 
-        for i,j in enumerate(self.db.sentences(self.contexts[0])):
+        for i,j in enumerate(self.db.sentences(self.current_context)):
             b1 = self.button_initialiser(j)
             b1.clicked.connect(lambda state, b1=b1: self.textEdit.append(b1.text()))
             y = i % 3
@@ -163,6 +165,7 @@ class Window(QMainWindow, Ui_MainWindow):
         return b
 
     def layout_button_initialiser(self,context):
+            self.current_context = context
             for i,j in enumerate(self.db.sentences(context)):
                 b1 = self.button_initialiser(j)
                 b1.clicked.connect(lambda state, b1=b1: self.textEdit.append(b1.text()))
@@ -174,7 +177,19 @@ class Window(QMainWindow, Ui_MainWindow):
         text, ok = QInputDialog.getText(self, 'Text Saver', 'Enter text:', QLineEdit.Normal, button.text())
         if ok:
             # set botton text
+            old_text = button.text()
             button.setText(text)
+            self.db.replace_sentence(self.current_context, old_text, button.text())
+            # # find the old_text in self.db.sentences(self.context)
+            # sentences = self.db.sentences(self.current_context)
+            # for i,j in enumerate(sentences):
+            #     if j == old_text:
+            #         sentences[i] = button.text()
+            #         self.db.replace_sentences(self.current_context, sentences)
+            #         break
+
+
+
 
 
 if __name__ == "__main__":
