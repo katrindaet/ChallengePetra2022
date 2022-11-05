@@ -5,6 +5,9 @@
 # > mytts.say('Hello, World')
 
 import pyttsx3
+import simpleaudio
+from google.auth import exceptions
+from google.cloud import texttospeech
 
 
 class TTS:
@@ -13,11 +16,26 @@ class TTS:
         self._voices = {
             voice.id: voice.name for voice in self._engine.getProperty("voices")
         }
+
+        # Only add Google TTS if environment variable for authentication is set.
+        try:
+            self._google_tts_client = texttospeech.TextToSpeechClient()
+            self._play_buffer = None
+            self._voices["google-english"] = "Google Englisch"
+            self._voices["google-german"] = "Google Deutsch"
+        except exceptions.DefaultCredentialsError:
+            pass
+
+        self._rate_modifier = 1.0
+
         # Reading properties on SAPI doesn't reflect actual value after a change, store values in local variable
         self._volume = self._engine.getProperty("volume")
-        self._rate = self._engine.getProperty("rate")
+        self._base_rate = self._engine.getProperty("rate")
         self._voice_id = self._engine.getProperty("voice")
         self._playing = False
+
+    def googleTtsIsActive(self):
+        return self._voice_id.startswith("google")
 
     def voiceId(self):
         return self._voice_id
@@ -39,22 +57,49 @@ class TTS:
         self._engine.setProperty("volume", volume)
 
     def rate(self):
-        return self._rate
+        return self._rate_modifier
 
     def setRate(self, rate):
-        assert rate > 0
-        self._rate = rate
-        self._engine.setProperty("rate", rate)
+        assert 0.25 <= rate <= 4.0
+        self._rate_modifier = rate
+        self._engine.setProperty("rate", rate * self._base_rate)
 
     def say(self, text):
         # Refuse playback while there's an active playback.
         if self._playing:
             return
         self._playing = True
-        self._engine.say(text)
-        self._engine.runAndWait()
+        if self.googleTtsIsActive():
+            synthesis_input = texttospeech.SynthesisInput(text=text)
+            language = {
+                "google-english": "en-GB",
+                "google-german": "de-DE",
+            }.get(self._voice_id, "de-DE")
+            voice = texttospeech.VoiceSelectionParams(
+                language_code=language, ssml_gender=texttospeech.SsmlVoiceGender.FEMALE
+            )
+            audio_config = texttospeech.AudioConfig(
+                audio_encoding=texttospeech.AudioEncoding.LINEAR16,
+                speaking_rate=self._rate_modifier,
+                volume_gain_db=(1.0 - self._volume) * -96,
+            )
+            response = self._google_tts_client.synthesize_speech(
+                input=synthesis_input, voice=voice, audio_config=audio_config
+            )
+            self._play_buffer = simpleaudio.play_buffer(
+                response.audio_content, 1, 2, 24000
+            ).wait_done()
+            self._play_buffer = None
+        else:
+            self._engine.say(text)
+            self._engine.runAndWait()
         self._playing = False
 
     def cancel(self):
-        self._engine.stop()
+        if self.googleTtsIsActive():
+            if self._play_buffer is not None:
+                self._play_buffer.stop()
+                self._play_buffer = None
+        else:
+            self._engine.stop()
         self._playing = False
