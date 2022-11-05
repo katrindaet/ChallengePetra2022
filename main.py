@@ -11,7 +11,8 @@ from PyQt5.QtGui import QFont
 from GUI import Ui_MainWindow
 import tts
 from database import Database
-
+# import QKeySequence
+from PyQt5.QtGui import QKeySequence
 # detect when enter is pressed
 
 
@@ -38,6 +39,12 @@ class MyButton(QPushButton):
 class Window(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
+
+        # detect enter with QKeySequence
+        keySequence = QKeySequence('Ctrl+P')#Qt.Key_Enter)
+        self.enter_shortcut = QShortcut(keySequence, self)
+        self.enter_shortcut.activated.connect(self.play_sound)
+
         self.setupUi(self)
         self.mytts = tts.TTS()
         self.text_font = QFont("Arial", 20)
@@ -106,16 +113,6 @@ class Window(QMainWindow, Ui_MainWindow):
         icon = QIcon(".\icons_gui\speaker.png")
         self.Setting1.setIcon(icon)
 
-        def play_sound():
-            # save text in new variable
-            text = self.textEdit.toPlainText()
-            # disable play press
-            self.Setting1.setEnabled(False)
-            # self.textEdit.clear()
-            self.mytts.say(text)
-
-            # enable play press
-            self.Setting1.setEnabled(True)
         
         def erase():
             self.textEdit.clear()
@@ -124,7 +121,7 @@ class Window(QMainWindow, Ui_MainWindow):
 
 
         # when setting1 is clicked play the content of textedit
-        self.Setting1.clicked.connect(lambda state, self=self: play_sound())
+        self.Setting1.clicked.connect(lambda state, self=self: self.play_sound())
 
         # when setting3 is clicked clear the textedit
         self.Setting3.clicked.connect(lambda state, self=self: erase())
@@ -188,8 +185,16 @@ class Window(QMainWindow, Ui_MainWindow):
             #         self.db.replace_sentences(self.current_context, sentences)
             #         break
 
+    def play_sound(self):
+        # save text in new variable
+        text = self.textEdit.toPlainText()
+        # disable play press
+        self.Setting1.setEnabled(False)
+        # self.textEdit.clear()
+        self.mytts.say(text)
 
-
+        # enable play press
+        self.Setting1.setEnabled(True)
 
 
 if __name__ == "__main__":
