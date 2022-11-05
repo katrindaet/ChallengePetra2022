@@ -9,6 +9,7 @@ from PyQt5.uic import loadUi
 from PyQt5.QtGui import QFont
 
 from GUI import Ui_MainWindow
+import tts
 
 # .setMaximumSize(QtCore.QSize(16777215, 80))
 
@@ -16,7 +17,7 @@ class Window(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
-
+        self.mytts = tts.TTS()
         text_font = QFont("Arial", 20)
         display_font = QFont("Arial", 24)
         # set font color
@@ -83,8 +84,9 @@ class Window(QMainWindow, Ui_MainWindow):
         icon = QIcon(".\icons_gui\speaker.png")
         self.Setting1.setIcon(icon)
         # when setting1 is clicked print the content of textedit in the console
-        self.Setting1.clicked.connect(lambda state, self=self: print(self.textEdit.toPlainText()))
-
+        self.Setting1.clicked.connect(lambda state, self=self: self.mytts.say(self.textEdit.toPlainText()))
+        # > mytts = tts.TTS()
+# > mytts.say('Hello, World')
         # loop through Setting1 to 6 and make the botton expand
         for i in range(6):
             b1 = getattr(self, "Setting" + str(i+1))
