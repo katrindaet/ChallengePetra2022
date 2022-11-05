@@ -9,6 +9,7 @@ from PyQt5.uic import loadUi
 from PyQt5.QtGui import QFont
 
 from GUI import Ui_MainWindow
+from Settings import Ui_Dialog
 import tts
 from database import Database
 # import QKeySequence
@@ -126,6 +127,9 @@ class Window(QMainWindow, Ui_MainWindow):
         # when setting3 is clicked clear the textedit
         self.Setting3.clicked.connect(lambda state, self=self: erase())
 
+        # when setting6 is clicked clear the textedit
+        self.Setting6.clicked.connect(lambda state, self=self: self.open_settings())
+
 
         # > mytts = tts.TTS()
 # > mytts.say('Hello, World')
@@ -195,6 +199,29 @@ class Window(QMainWindow, Ui_MainWindow):
 
         # enable play press
         self.Setting1.setEnabled(True)
+
+    def open_settings(self):
+        # open the settings GUI
+        self.settings = Settings(self.mytts)
+        self.settings.show()
+
+
+class Settings(QDialog, Ui_Dialog):
+    def __init__(self, tts, parent=None):
+
+        super().__init__(parent)
+
+        self.tts = tts
+        self.setupUi(self)
+        self.comboBox.addItems(tts.voices())
+        self.comboBox.setCurrentText(tts.voiceId())
+        self.horizontalSlider.setValue(tts.rate())
+        self.buttonBox.accepted.connect(lambda self=self: self.OK())
+
+    def OK(self):
+        self.tts.setRate(self.horizontalSlider.value())
+        self.tts.setVoice(self.comboBox.currentText())
+
 
 
 if __name__ == "__main__":

@@ -26,6 +26,7 @@ class Ui_Dialog(object):
         self.comboBox.setObjectName("comboBox")
         self.formLayout_2.setWidget(5, QtWidgets.QFormLayout.FieldRole, self.comboBox)
         self.horizontalSlider = QtWidgets.QSlider(Dialog)
+        self.horizontalSlider.setMaximum(256)
         self.horizontalSlider.setOrientation(QtCore.Qt.Horizontal)
         self.horizontalSlider.setObjectName("horizontalSlider")
         self.formLayout_2.setWidget(7, QtWidgets.QFormLayout.FieldRole, self.horizontalSlider)
