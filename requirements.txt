@@ -1,3 +1,5 @@
 pyttsx3==2.6
 PyQt5==5.12.3
 autocomplete==0.0.104
+simpleaudio==1.0.4
+google-cloud-texttospeech==2.12
