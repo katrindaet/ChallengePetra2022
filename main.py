@@ -64,41 +64,10 @@ class Window(QMainWindow, Ui_MainWindow):
         # read context from the database
         self.db = Database('sentences.json')
 
-        self.contexts = self.db.contexts()
+        self.current_context = self.db.contexts()[0]
+        self.initiate_custom_buttons()
+        self.layout_button_initialiser(self.current_context)
 
-        self.current_context = self.contexts[0]
-
-        for i,j in enumerate(self.db.sentences(self.current_context)):
-            b1 = self.button_initialiser(j)
-            b1.clicked.connect(lambda state, b1=b1: self.textEdit.append(b1.text()))
-            y = i % 3
-            x = math.floor(i/3)
-            self.gridLayout1.addWidget(b1,x,y)
-
-
-
-        for i,j in enumerate(self.contexts):
-            b1 = self.button_initialiser(j)
-            b1.clicked.connect(lambda state, b1=b1: self.layout_button_initialiser(b1.text()))
-            b1.setMaximumWidth(400)
-            y = i % 2
-            x = math.floor(i/2)
-            self.gridLayout2.addWidget(b1,x,y)
-            # background color of the buttom
-            # b1.setStyleSheet("background-color: rgb(0, 60, 120);")
-
-        for i in range(4):
-            b1 = QPushButton("Custom")
-            b1.setFont(self.text_font)
-            b1.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-            # max width of the button
-            b1.setMaximumWidth(400)
-
-            y = i % 2
-            x = math.floor(i/2)
-            self.gridLayout3.addWidget(b1,x,y)
-            # background color of the buttom
-            # b1.setStyleSheet("background-color: rgb(120, 60, 0);")
 
         # add icons in settings
         icon = QIcon(".\icons_gui\delete.png")
@@ -130,6 +99,11 @@ class Window(QMainWindow, Ui_MainWindow):
         # when setting6 is clicked clear the textedit
         self.Setting6.clicked.connect(lambda state, self=self: self.open_settings())
 
+        # when setting4 is clicked create new context
+        self.Setting4.clicked.connect(lambda state, self=self: self.add_new_context())
+
+        # when setting5 is clicked create new sentence
+        self.Setting5.clicked.connect(lambda state, self=self: self.add_new_sentence())
 
         # > mytts = tts.TTS()
 # > mytts.say('Hello, World')
@@ -150,11 +124,19 @@ class Window(QMainWindow, Ui_MainWindow):
 
 
     def initiate_custom_buttons(self):
-            # erase content of the gridlayout1
-            for i in reversed(range(self.gridLayout1.count())):
-                self.gridLayout1.itemAt(i).widget().setParent(None)
-            # read the database
-
+        # erase content of the gridlayout1
+        for i in reversed(range(self.gridLayout2.count())):
+            self.gridLayout2.itemAt(i).widget().setParent(None)
+        # read the database
+        for i,j in enumerate(self.db.contexts()):
+            b1 = self.button_initialiser(j)
+            b1.clicked.connect(lambda state, b1=b1: self.layout_button_initialiser(b1.text()))
+            b1.setMaximumWidth(400)
+            y = i % 2
+            x = math.floor(i/2)
+            self.gridLayout2.addWidget(b1,x,y)
+            # background color of the buttom
+            # b1.setStyleSheet("background-color: rgb(0, 60, 120);")
     def button_initialiser(self,text):
         b = MyButton(text)
         b.setFont(self.text_font)
@@ -166,13 +148,17 @@ class Window(QMainWindow, Ui_MainWindow):
         return b
 
     def layout_button_initialiser(self,context):
-            self.current_context = context
-            for i,j in enumerate(self.db.sentences(context)):
-                b1 = self.button_initialiser(j)
-                b1.clicked.connect(lambda state, b1=b1: self.textEdit.append(b1.text()))
-                y = i % 3
-                x = math.floor(i/3)
-                self.gridLayout1.addWidget(b1,x,y)
+        for i in reversed(range(self.gridLayout1.count())):
+            self.gridLayout1.itemAt(i).widget().setParent(None)
+        self.current_context = context
+        print(context)
+        for i,j in enumerate(self.db.sentences(context)):
+            print(j)
+            b1 = self.button_initialiser(j)
+            b1.clicked.connect(lambda state, b1=b1: self.textEdit.append(b1.text()))
+            y = i % 3
+            x = math.floor(i/3)
+            self.gridLayout1.addWidget(b1,x,y)
 
     def create_qinputdialog(self,button):
         text, ok = QInputDialog.getText(self, 'Text Saver', 'Enter text:', QLineEdit.Normal, button.text())
@@ -188,6 +174,19 @@ class Window(QMainWindow, Ui_MainWindow):
             #         sentences[i] = button.text()
             #         self.db.replace_sentences(self.current_context, sentences)
             #         break
+    def add_new_context(self):
+        text, ok = QInputDialog.getText(self, 'Add new context', 'Enter text:')
+        if ok:
+            # add new context to database
+
+            self.db.add_new_context(text)
+            self.initiate_custom_buttons()
+    def add_new_sentence(self):
+         text, ok = QInputDialog.getText(self, 'Add new sentence', 'Enter text:')
+         if ok:
+             # add new context to database
+             self.db.add_new_sentence(self.current_context, text)
+             self.layout_button_initialiser(self.current_context)
 
     def play_sound(self):
         # save text in new variable
