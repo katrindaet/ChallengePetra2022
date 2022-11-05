@@ -16,11 +16,13 @@ class auto_complete:
 
 
     def predict(self, word_prefix):
+        word_prefix = word_prefix.lower()
         predict = self.autocomplete.search(word=word_prefix)
         return [words[0] for words in predict]
 
     #if text_field has a space after (word finished)
     def increment_count(self, word):
+        word = word.lower()
         self.autocomplete.update_count_of_word(word=word, count=self.autocomplete.get_count_of_word(word)+1)
         self.data[word] =[{ }, "", self.autocomplete.get_count_of_word(word)]
 
@@ -28,4 +30,3 @@ class auto_complete:
     def save_json(self):
         with open(self.dataset, "w") as outfile:
             json.dump(self.data, outfile)
-
