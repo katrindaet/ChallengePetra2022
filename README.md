@@ -45,9 +45,6 @@ gritlayouts
 2: preferences / topics / modes +
 3: saved settings
 4: settings
-5: settings + text display
-6: 1-3
-7: everything
 
 
 
