@@ -26,6 +26,11 @@ class Database:
 
   def add_new_context(self, new_context):
     self.data['Contexts'][new_context] = []
+    with open('sentences.json', 'w') as f:
+      json.dump(self.data, f)
 
   def add_new_sentence(self, context, new_sentence):
     self.data['Contexts'][context].append(new_sentence)
+
+    with open('sentences.json', 'w') as f:
+      json.dump(self.data, f)
