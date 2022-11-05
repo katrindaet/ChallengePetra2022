@@ -14,6 +14,24 @@ from database import Database
 
 # .setMaximumSize(QtCore.QSize(16777215, 80))
 
+class MyButton(QPushButton):
+
+    rightclick = pyqtSignal()
+
+    def __init__(self,*args,**kwargs):
+        super().__init__(*args, **kwargs)
+        # self.setText(text)
+        
+
+    def mousePressEvent(self, QMouseEvent):
+        if QMouseEvent.button() == Qt.RightButton:
+            #do what you want here
+            print("Right Button Clicked")
+            self.rightclick.emit()
+        else:
+            super().mousePressEvent(QMouseEvent)
+
+
 class Window(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -127,10 +145,13 @@ class Window(QMainWindow, Ui_MainWindow):
             # read the database
 
     def button_initialiser(self,text):
-        b = QPushButton(text)
+        b = MyButton(text)
         b.setFont(self.text_font)
         # make the buttom expand
         b.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        b.rightclick.connect(lambda b=b: self.create_qinputdialog(b))
+        # create Qinputdialog
+        # text, ok = QInputDialog.getText(self, 'Input Dialog', 'Enter your name:')
         return b
 
     def layout_button_initialiser(self,context):
@@ -141,6 +162,11 @@ class Window(QMainWindow, Ui_MainWindow):
                 x = math.floor(i/3)
                 self.gridLayout1.addWidget(b1,x,y)
 
+    def create_qinputdialog(self,button):
+        text, ok = QInputDialog.getText(self, 'Text Saver', 'Enter text:', QLineEdit.Normal, button.text())
+        if ok:
+            # set botton text
+            button.setText(text)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
