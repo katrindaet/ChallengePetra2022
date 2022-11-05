@@ -1,8 +1,8 @@
 import sys
 import math
-from PyQt5.QtWidgets import (
-    QApplication, QDialog, QMainWindow, QMessageBox, QPushButton
-)
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import QIcon
 from PyQt5.uic import loadUi
 
 from GUI import Ui_MainWindow
@@ -27,6 +27,9 @@ class Window(QMainWindow, Ui_MainWindow):
             x = math.floor(i/2)
             self.gridLayout3.addWidget(b1,x,y)
 
+        # add icons in settings
+        icon = QIcon(".\icons_gui\delete.png")
+        self.Setting2.setIcon(icon)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

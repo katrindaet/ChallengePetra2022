@@ -39,6 +39,17 @@ Contributors names and contact info
 * Hacker 1..
 * Hacker 2..
 
+## GUI 
+gritlayouts
+1: main -> suggestions
+2: preferences / topics / modes +
+3: saved settings
+4: settings
+5: settings + text display
+6: 1-3
+7: everything
+
+
 
 ## License
 
