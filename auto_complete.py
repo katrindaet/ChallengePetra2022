@@ -17,7 +17,7 @@ class auto_complete:
 
     def predict(self, word_prefix):
         predict = self.autocomplete.search(word=word_prefix)
-        return [words[0] for words in predict[word][0]]
+        return [words[0] for words in predict]
 
     #if text_field has a space after (word finished)
     def increment_count(self, word):
