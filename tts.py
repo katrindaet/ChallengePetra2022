@@ -17,6 +17,7 @@ class TTS:
         self._volume = self._engine.getProperty("volume")
         self._rate = self._engine.getProperty("rate")
         self._voice_id = self._engine.getProperty("voice")
+        self._playing = False
 
     def voiceId(self):
         return self._voice_id
@@ -46,8 +47,14 @@ class TTS:
         self._engine.setProperty("rate", rate)
 
     def say(self, text):
+        # Refuse playback while there's an active playback.
+        if self._playing:
+            return
+        self._playing = True
         self._engine.say(text)
         self._engine.runAndWait()
+        self._playing = False
 
     def cancel(self):
         self._engine.stop()
+        self._playing = False
