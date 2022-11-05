@@ -12,7 +12,10 @@ from GUI import Ui_MainWindow
 import tts
 from database import Database
 
-# .setMaximumSize(QtCore.QSize(16777215, 80))
+# detect when enter is pressed
+
+
+# .setMaximumSize(QtCore.QSize(16777215, 80)
 
 class MyButton(QPushButton):
 
@@ -104,8 +107,13 @@ class Window(QMainWindow, Ui_MainWindow):
         def play_sound():
             # save text in new variable
             text = self.textEdit.toPlainText()
+            # disable play press
+            self.Setting1.setEnabled(False)
             # self.textEdit.clear()
             self.mytts.say(text)
+
+            # enable play press
+            self.Setting1.setEnabled(True)
         
         def erase():
             self.textEdit.clear()
@@ -168,7 +176,9 @@ class Window(QMainWindow, Ui_MainWindow):
             # set botton text
             button.setText(text)
 
+
 if __name__ == "__main__":
+
     app = QApplication(sys.argv)
     win = Window()
     win.show()
