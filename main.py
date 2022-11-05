@@ -15,9 +15,17 @@ class Window(QMainWindow, Ui_MainWindow):
             b1 = QPushButton("Button1")
             y = i % 3
             x = math.floor(i/3)
-            self.gridLayout.addWidget(b1,x,y)
-
-
+            self.gridLayout1.addWidget(b1,x,y)
+        for i in range(6):
+            b1 = QPushButton("Button1")
+            y = i % 2
+            x = math.floor(i/2)
+            self.gridLayout2.addWidget(b1,x,y)
+        for i in range(4):
+            b1 = QPushButton("Button1")
+            y = i % 2
+            x = math.floor(i/2)
+            self.gridLayout3.addWidget(b1,x,y)
 
 
 if __name__ == "__main__":
@@ -25,3 +33,8 @@ if __name__ == "__main__":
     win = Window()
     win.show()
     sys.exit(app.exec())
+
+
+
+# convert gui.ui to .py
+# pyuic5 gui.ui -o gui.py
