@@ -20,4 +20,5 @@ class Database:
 
   def replace_sentences(self, context, sentences):
     self.data['Contexts'][context] = sentences
-
+    with open('sentences.json', 'w') as f:
+      json.dump(self.data, f)
