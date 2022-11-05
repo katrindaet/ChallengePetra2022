@@ -18,7 +18,8 @@ class Database:
     sentence_list = [sentence for sentence in itertools.chain.from_iterable(self.data['Contexts'].values()) if sentence.startswith(prefix)]
     return sentence_list  #returns a list containing the sentences that start with the given prefix
 
-  def replace_sentences(self, context, sentences):
-    self.data['Contexts'][context] = sentences
+  def replace_sentence(self, context, old_sentence, new_sentence):
+    self.data['Contexts'][context][self.data['Contexts'][context].index(old_sentence)] = new_sentence
+
     with open('sentences.json', 'w') as f:
       json.dump(self.data, f)
