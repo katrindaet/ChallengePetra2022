@@ -83,8 +83,16 @@ class Window(QMainWindow, Ui_MainWindow):
         self.Setting6.setIcon(icon)
         icon = QIcon(".\icons_gui\speaker.png")
         self.Setting1.setIcon(icon)
-        # when setting1 is clicked print the content of textedit in the console
-        self.Setting1.clicked.connect(lambda state, self=self: self.mytts.say(self.textEdit.toPlainText()))
+        def play_sound():
+            # save text in new variable
+            text = self.textEdit.toPlainText()
+            self.textEdit.clear()
+            self.mytts.say(text)
+            # clear the textedit
+            
+        # when setting1 is clicked play the content of textedit
+        self.Setting1.clicked.connect(lambda state, self=self: play_sound())
+
         # > mytts = tts.TTS()
 # > mytts.say('Hello, World')
         # loop through Setting1 to 6 and make the botton expand
