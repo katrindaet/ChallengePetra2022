@@ -10,6 +10,7 @@ from PyQt5.QtGui import QFont
 
 from GUI import Ui_MainWindow
 import tts
+from database import Database
 
 # .setMaximumSize(QtCore.QSize(16777215, 80))
 
@@ -30,19 +31,24 @@ class Window(QMainWindow, Ui_MainWindow):
         self.textEdit.setMaximumSize(QtCore.QSize(16777215, 450))
 
 
+        # read context from the database
+        self.db = Database('sentences.json')
 
-        for i in range(12):
-            b1 = self.button_initialiser("Suggestions very very \n very very very very long")
+        self.contexts = self.db.contexts()
+
+
+        for i,j in enumerate(self.db.sentences(self.contexts[0])):
+            b1 = self.button_initialiser(j)
+            b1.clicked.connect(lambda state, b1=b1: self.textEdit.append(b1.text()))
             y = i % 3
             x = math.floor(i/3)
             self.gridLayout1.addWidget(b1,x,y)
 
 
 
-        for i in range(6):
-            b1 = QPushButton("Themes")
-            b1.setFont(self.text_font)
-            b1.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        for i,j in enumerate(self.contexts):
+            b1 = self.button_initialiser(j)
+            b1.clicked.connect(lambda state, b1=b1: self.layout_button_initialiser(b1.text()))
             b1.setMaximumWidth(400)
             y = i % 2
             x = math.floor(i/2)
@@ -122,11 +128,18 @@ class Window(QMainWindow, Ui_MainWindow):
 
     def button_initialiser(self,text):
         b = QPushButton(text)
-        b.clicked.connect(lambda state, b=b: self.textEdit.append(b.text()))
         b.setFont(self.text_font)
         # make the buttom expand
         b.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         return b
+
+    def layout_button_initialiser(self,context):
+            for i,j in enumerate(self.db.sentences(context)):
+                b1 = self.button_initialiser(j)
+                b1.clicked.connect(lambda state, b1=b1: self.textEdit.append(b1.text()))
+                y = i % 3
+                x = math.floor(i/3)
+                self.gridLayout1.addWidget(b1,x,y)
 
 
 if __name__ == "__main__":
