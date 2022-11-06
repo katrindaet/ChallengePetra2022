@@ -8,12 +8,12 @@ except ImportError:
     from comtypes.gen import SpeechLib
 
 import pythoncom
+import locale
 import time
 import math
 import os
 import weakref
 from ..voice import Voice
-from . import toUtf8, fromUtf8
 
 # common voices
 MSSAM = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Speech\\Voices\\Tokens\\MSSam'
@@ -53,7 +53,11 @@ class SAPI5Driver(object):
         self._proxy.setBusy(True)
         self._proxy.notify('started-utterance')
         self._speaking = True
-        self._tts.Speak(fromUtf8(toUtf8(text)))
+        if locale.getpreferredencoding() == 'cp1252':
+            encoded_text = text.encode('cp1252', errors="ignore").decode('cp1252')
+        else:
+            encoded_text = text.decode('utf-8')
+        self._tts.Speak(encoded_text)
 
     def stop(self):
         if not self._speaking:
@@ -68,7 +72,11 @@ class SAPI5Driver(object):
         stream.Open(filename, SpeechLib.SSFMCreateForWrite)
         temp_stream = self._tts.AudioOutputStream
         self._tts.AudioOutputStream = stream
-        self._tts.Speak(fromUtf8(toUtf8(text)))
+        if locale.getpreferredencoding() == 'cp1252':
+            encoded_text = text.encode('cp1252', errors="ignore").decode('cp1252')
+        else:
+            encoded_text = text.decode('utf-8')
+        self._tts.Speak(encoded_text)
         self._tts.AudioOutputStream = temp_stream
         stream.close()
         os.chdir(cwd)
