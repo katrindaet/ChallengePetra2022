@@ -214,11 +214,11 @@ class Settings(QDialog, Ui_Dialog):
         self.setupUi(self)
         self.comboBox.addItems(tts.voices())
         self.comboBox.setCurrentText(tts.voiceId())
-        self.horizontalSlider.setValue(tts.rate())
+        self.horizontalSlider.setValue(100 * tts.rate())
         self.buttonBox.accepted.connect(lambda self=self: self.OK())
 
     def OK(self):
-        self.tts.setRate(self.horizontalSlider.value())
+        self.tts.setRate(self.horizontalSlider.value() / 100)
         self.tts.setVoice(self.comboBox.currentText())
 
 
