@@ -62,11 +62,12 @@ class Window(QMainWindow, Ui_MainWindow):
         # max size of the textedit
         self.textEdit.setMaximumSize(QtCore.QSize(16777215, 450))
 
-        
-
         # read context from the database
         self.db = Database('sentences.json')
-        self.auto_complete = auto_complete('english_dataset_auto_complete.json')
+
+        self.language = 'Deutsch'
+        # Load Autocomplete
+        self.load_autocomplete()
 
         self.current_context = self.db.contexts()[0]
         self.initiate_custom_buttons()
@@ -125,21 +126,36 @@ class Window(QMainWindow, Ui_MainWindow):
         self.textEdit.cursorPositionChanged.connect(lambda: self.take_word_text_edit())
 
         # > mytts = tts.TTS()
-# > mytts.say('Hello, World')
-        # loop through Setting1 to 6 and make the botton expand
+        # > mytts.say('Hello, World')
+        # loop through Setting1 to 6 and make the button expand
         for i in range(6):
             b1 = getattr(self, "Setting" + str(i+1))
             b1.setIconSize(QSize(200,200))
             # set minimum size of the button
             b1.setMinimumSize(QSize(100,100))
-            b1.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+            b1.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+
             b1.setMaximumWidth(300)
 
 
-        # when any botton is pressed do something
-
         # adapt size of icon
         self.Setting2.setIconSize(QtCore.QSize(100, 100))
+
+    def load_autocomplete(self):
+        autocomplete_file = {
+            'Deutsch': 'german_dataset_auto_complete.json',
+            'English': 'english_dataset_auto_complete.json',
+        }.get(self.language, 'german_dataset_auto_complete.json')
+
+        self.auto_complete = auto_complete(autocomplete_file)
+
+    def resizeEvent(self, event):
+        self.Setting2.setIconSize(self.Setting2.size())
+        self.Setting3.setIconSize(self.Setting3.size())
+        self.Setting4.setIconSize(self.Setting4.size())
+        self.Setting5.setIconSize(self.Setting5.size())
+        self.Setting6.setIconSize(self.Setting6.size())
+        self.Setting1.setIconSize(self.Setting1.size())
 
     def initiate_custom_buttons(self):
         # erase content of the gridlayout1
@@ -178,14 +194,14 @@ class Window(QMainWindow, Ui_MainWindow):
     def take_word_text_edit(self):
         text = self.textEdit.toPlainText()
         try:
-            if text[-1] != ' ':
-                mytext = self.textEdit.toPlainText()
-                words = mytext.split()
-                word_prefix = words[-1]
-                predicted_words = self.auto_complete.predict(word_prefix=word_prefix)
-                self.initiate_auto_complete(predicted_words=predicted_words)
-            else :
+            if not text:
                 self.layout_button_initialiser(self.current_context)
+            elif text[-1] != ' ':
+                words = text.split()
+                word_prefix = words[-1]
+                predicted_words = self.auto_complete.predict(word_prefix)
+                predicted_sentences = self.db.sentences_containing(word_prefix)
+                self.initiate_auto_complete(predicted_words + predicted_sentences)
         except:
             pass
 
@@ -194,7 +210,7 @@ class Window(QMainWindow, Ui_MainWindow):
     def button_initialiser(self,text):
         b = MyButton(text)
         b.setFont(self.text_font)
-        # make the buttom expand
+        # make the button expand
         b.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         b.rightclick.connect(lambda b=b: self.create_qinputdialog(b))
         # create Qinputdialog
@@ -226,6 +242,7 @@ class Window(QMainWindow, Ui_MainWindow):
             #         sentences[i] = button.text()
             #         self.db.replace_sentences(self.current_context, sentences)
             #         break
+
     def add_new_context(self):
         text, ok = QInputDialog.getText(self, 'Add new context', 'Enter text:')
         if ok:
@@ -254,16 +271,17 @@ class Window(QMainWindow, Ui_MainWindow):
 
     def open_settings(self):
         # open the settings GUI
-        self.settings = Settings(self.mytts)
+        self.settings = Settings(self.mytts, self)
         self.settings.show()
 
 
 class Settings(QDialog, Ui_Dialog):
-    def __init__(self, tts, parent=None):
+    def __init__(self, tts, app, parent=None):
 
         super().__init__(parent)
 
         self.tts = tts
+        self.app = app
         self.setupUi(self)
         for voice_id, name in tts.voices().items():
             self.comboBox.addItem(name, voice_id)
@@ -271,15 +289,27 @@ class Settings(QDialog, Ui_Dialog):
         self.horizontalSlider.setValue(100 * tts.rate())
         self.buttonBox.accepted.connect(lambda self=self: self.OK())
 
+        self.comboBox_2.addItem('Deutsch')
+        self.comboBox_2.addItem('English')
+
+
+
+
+
     def OK(self):
         self.tts.setRate(self.horizontalSlider.value() / 100)
         self.tts.setVoice(self.comboBox.currentData())
+        newlanguage = self.comboBox_2.currentText()
+        if newlanguage != self.app.language:
+            self.app.language = newlanguage
+            self.app.load_autocomplete()
+
 
 
 
 if __name__ == "__main__":
-
     app = QApplication(sys.argv)
+    app.setFont(QFont("Arial", 24))
     win = Window()
     win.showMaximized()
     sys.exit(app.exec())
