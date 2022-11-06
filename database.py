@@ -42,6 +42,7 @@ class Database:
   def delete_sentences(self, context):
     for sentence in self.data['Contexts'][context]:
       del sentence
+    self.save_database()
 
   def save_database(self):
     with open('sentences.json', 'w') as f:
