@@ -80,21 +80,21 @@ class Window(QMainWindow, Ui_MainWindow):
         self.Setting3.setIcon(delete)
         self.Setting3.setIconSize(self.Setting3.size())
 
-        plus = QIcon(".\icons_gui\plus.svg")
-        self.Setting4.setIcon(plus)
+        context = QIcon(".\icons_gui\context.png")
+        self.Setting4.setIcon(context)
         self.Setting4.setIconSize(self.Setting4.size())
 
-        context = QIcon(".\icons_gui\context.png")
-        self.Setting5.setIcon(context)
+        plus = QIcon(".\icons_gui\plus.svg")
+        self.Setting5.setIcon(plus)
         self.Setting5.setIconSize(self.Setting5.size())
-
 
         settings = QIcon(".\icons_gui\settings.png")
         self.Setting6.setIconSize(self.Setting6.size())
         self.Setting6.setIcon(settings)
 
-        icon = QIcon(".\icons_gui\speaker.png")
-        self.Setting1.setIcon(icon)
+
+        copy = QIcon(".\icons_gui\copy.svg")
+        self.Setting1.setIcon(copy)
         self.Setting1.setIconSize(self.Setting1.size())
 
 
@@ -106,7 +106,7 @@ class Window(QMainWindow, Ui_MainWindow):
 
 
         # when setting1 is clicked play the content of textedit
-        self.Setting1.clicked.connect(lambda state, self=self: self.play_sound())
+        self.Setting2.clicked.connect(lambda state, self=self: self.play_sound())
 
         # when setting3 is clicked clear the textedit
         self.Setting3.clicked.connect(lambda state, self=self: erase())
@@ -177,10 +177,10 @@ class Window(QMainWindow, Ui_MainWindow):
     def create_qinputdialog(self,button):
         text, ok = QInputDialog.getText(self, 'Text Saver', 'Enter text:', QLineEdit.Normal, button.text())
         if ok:
-            # set botton text
+            # set button text
             old_text = button.text()
-            self.button.setText(text)
-            db.replace_sentence(self.current_context, old_text, button.text())
+            button.setText(text)
+            self.db.replace_sentence(self.current_context, old_text, button.text())
             # # find the old_text in self.db.sentences(self.context)
             # sentences = self.db.sentences(self.current_context)
             # for i,j in enumerate(sentences):
