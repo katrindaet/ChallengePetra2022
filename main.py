@@ -27,7 +27,7 @@ class MyTextEdit(QTextEdit):
         super(MyTextEdit, self).__init__(*args, **kwargs)
 
     def keyPressEvent(self, e):
-        if e.key() == Qt.Key_Enter or e.key() == Qt.Key_Return:
+        if e.key() == Qt.Key_Enter or e.key() == Qt.Key_Return or e.key() == Qt.Key_Escape:
             self.enterPressed.emit()
         else:
             super().keyPressEvent(e)
