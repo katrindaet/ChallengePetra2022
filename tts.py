@@ -5,7 +5,9 @@
 # > mytts.say('Hello, World')
 
 import pyttsx3
+import os
 import simpleaudio
+import tempfile
 from google.auth import exceptions
 from google.cloud import texttospeech
 
@@ -91,8 +93,11 @@ class TTS:
             ).wait_done()
             self._play_buffer = None
         else:
-            self._engine.say(text)
-            self._engine.runAndWait()
+            with tempfile.TemporaryDirectory() as tmpdirname:
+                ttsfile = os.path.join(tmpdirname, "tts.wav")
+                self._engine.save_to_file(text, ttsfile)
+                self._engine.runAndWait()
+                simpleaudio.WaveObject.from_wave_file(ttsfile).play().wait_done()
         self._playing = False
 
     def cancel(self):
