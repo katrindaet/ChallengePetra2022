@@ -225,7 +225,6 @@ class Window(QMainWindow, Ui_MainWindow):
         for i,j in enumerate(predicted_words):
             b1 = self.button_initialiser(j)
             b1.clicked.connect(lambda state, b1=b1: self.add_predicted_word(b1.text()))
-            b1.textChanged.connect(lambda oldtext, newtext: self.db.replace_sentence(self.current_context, oldtext, newtext))
             if len(b1.text().split())==1: #if it is a word count for dictionary, if a sentence, pass
                 b1.clicked.connect(lambda state, b1=b1: self.auto_complete.increment_count(b1.text()))
 
@@ -274,6 +273,7 @@ class Window(QMainWindow, Ui_MainWindow):
         for i,j in enumerate(self.db.sentences(context)):
             b1 = self.button_initialiser(j)
             b1.clicked.connect(lambda state, b1=b1: self.textEdit.append(b1.text()))
+            b1.textChanged.connect(lambda oldtext, newtext: self.db.replace_sentence(self.current_context, oldtext, newtext))
             y = i % 3
             x = math.floor(i/3)
             self.gridLayout1.addWidget(b1,x,y)
