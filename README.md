@@ -40,16 +40,6 @@ code blocks for commands
 
 ## Help
 
-Umlauts are broken on Windows if the default CP1252 encoding is used. Windows 11 should use UTF-8 by default.
-
-The only known workaround is to change Windows to use UTF-8:
-
-1. Press Win+r and execute `intl.cpl`.
-2. Select Adminstrative (Verwaltung) tab.
-3. Select "Change system locale" (Gebietsschema ändern)
-4. Check "Beta: Use Unicode UTF-8 for worldwide language support" (Beta: Unicode UTF-8 für die Unterstützung weltweiter Sprachen verwenden).
-5. Press "OK" and restart PC.
-
 Any advise for common problems or issues.
 ```
 command to run if program contains helper info
