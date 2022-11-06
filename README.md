@@ -14,8 +14,21 @@ For Petra, who has a speech handicap, it is challenging to communicate via audio
 
 ### Installing
 
-* How/where to download your program
-* Any modifications needed to be made to files/folders
+### Prepare installation directory:
+
+1. Install all requirements specified in requirements.txt. Also install google-cloud-core.
+
+2. Create new single file installer using auto py to exe (https://github.com/brentvollebregt/auto-py-to-exe):
+  * main.py file selected
+  * onefile
+  * window based
+
+3. Copy json files and icons_gui folder into output folder.
+4. Rename output folder and share it.
+
+Start main.exe in the directory.
+
+TODO: Upload and share prepared software.
 
 ### Executing program
 
