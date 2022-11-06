@@ -20,24 +20,70 @@ from PyQt5.QtGui import QKeySequence
 
 # .setMaximumSize(QtCore.QSize(16777215, 80)
 
+class MyTextEdit(QTextEdit):
+    enterPressed = pyqtSignal()
+
+    def __init__(self,  *args, **kwargs):
+        super(MyTextEdit, self).__init__(*args, **kwargs)
+
+    def keyPressEvent(self, e):
+        if e.key() == Qt.Key_Enter or e.key() == Qt.Key_Return:
+            self.enterPressed.emit()
+        else:
+            super().keyPressEvent(e)
+
 class MyButton(QPushButton):
+    textChanged = pyqtSignal(str, str)
 
-    rightclick = pyqtSignal()
+    def __init__(self, text):
+        super().__init__()
 
-    def __init__(self,*args,**kwargs):
-        super().__init__(*args, **kwargs)
-        # self.setText(text)
+        self.label = QLabel(self)
+        self.label.setWordWrap(True)
+        self.label.resize(self.size())
+        self.label.setAlignment(Qt.AlignCenter)
+        self.label.setFocusPolicy(Qt.NoFocus)
+
+        self.edit = MyTextEdit(self)
+        self.edit.resize(self.size())
+        self.edit.setAlignment(Qt.AlignCenter)
+        self.edit.viewport().setAutoFillBackground(False)
+        self.edit.enterPressed.connect(lambda self=self: self.save())
+
+        self.edit.setText(text)
+        self.switchToViewMode()
+
+    def switchToEditMode(self):
+        self.edit.setText(self.label.text())
+        self.label.hide()
+        self.edit.show()
+        self.setFocusProxy(self.edit)
+
+    def switchToViewMode(self):
+        self.label.setText(self.edit.toPlainText())
+        self.label.show()
+        self.edit.hide()
+        self.setFocusProxy(None)
         
+    def resizeEvent(self, event):
+        self.label.resize(self.size())
+        self.edit.resize(self.size())
 
     def mousePressEvent(self, QMouseEvent):
         if QMouseEvent.button() == Qt.RightButton:
-            #do what you want here
-            print("Right Button Clicked")
-            self.rightclick.emit()
+            self.switchToEditMode()
         else:
             super().mousePressEvent(QMouseEvent)
 
+    def text(self):
+        return self.label.text()
 
+    def setText(self, text):
+        self.label.setText(text)
+
+    def save(self):
+        self.textChanged.emit(self.label.text(), self.edit.toPlainText())
+        self.switchToViewMode()
 
 class Window(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -165,6 +211,7 @@ class Window(QMainWindow, Ui_MainWindow):
         for i,j in enumerate(self.db.contexts()):
             b1 = self.button_initialiser(j)
             b1.clicked.connect(lambda state, b1=b1: self.layout_button_initialiser(b1.text()))
+            b1.textChanged.connect(lambda oldtext, newtext: self.db.replace_context(oldtext, newtext))
             b1.setMaximumWidth(400)
             y = i % 2
             x = math.floor(i/2)
@@ -178,6 +225,7 @@ class Window(QMainWindow, Ui_MainWindow):
         for i,j in enumerate(predicted_words):
             b1 = self.button_initialiser(j)
             b1.clicked.connect(lambda state, b1=b1: self.add_predicted_word(b1.text()))
+            b1.textChanged.connect(lambda oldtext, newtext: self.db.replace_sentence(self.current_context, oldtext, newtext))
             if len(b1.text().split())==1: #if it is a word count for dictionary, if a sentence, pass
                 b1.clicked.connect(lambda state, b1=b1: self.auto_complete.increment_count(b1.text()))
 
@@ -215,7 +263,6 @@ class Window(QMainWindow, Ui_MainWindow):
         b.setFont(self.text_font)
         # make the button expand
         b.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        b.rightclick.connect(lambda b=b: self.create_qinputdialog(b))
         # create Qinputdialog
         # text, ok = QInputDialog.getText(self, 'Input Dialog', 'Enter your name:')
         return b
