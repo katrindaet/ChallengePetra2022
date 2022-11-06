@@ -86,17 +86,16 @@ class Window(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        # detect enter with QKeySequence
-        keySequence = QKeySequence('Ctrl+P')#Qt.Key_Enter)
+        # Text to speech shortcut
+        keySequence = QKeySequence('Ctrl+P')
         self.enter_shortcut = QShortcut(keySequence, self)
         self.enter_shortcut.activated.connect(self.play_sound)
 
+        # UI setup
         self.setupUi(self)
         self.mytts = tts.TTS()
-        self.text_font = QFont("Arial", 20)
         self.display_font = QFont("Arial", 24)
         # set font color
-        self.text_font.setBold(True)
         self.display_font.setBold(True)
 
 
@@ -107,7 +106,10 @@ class Window(QMainWindow, Ui_MainWindow):
 
         # read context from the database
         self.db = Database('sentences.json')
-        self.auto_complete = auto_complete('german_dataset_auto_complete.json')
+
+        self.language = 'Deutsch'
+        # Load Autocomplete
+        self.load_autocomplete()
 
         self.current_context = self.db.contexts()[0]
         self.initiate_custom_buttons()
@@ -236,8 +238,11 @@ class Window(QMainWindow, Ui_MainWindow):
                 predicted_words = self.auto_complete.predict(word_prefix)
                 predicted_sentences = self.db.sentences_containing(word_prefix)
                 self.initiate_auto_complete(predicted_words + predicted_sentences)
-            else :
-                self.layout_button_initialiser(self.current_context)
+            elif text[-1] == ' ':
+                words = text.split()
+                self.auto_complete.increment_count(words[-1])
+
+
         except:
             pass
 
@@ -343,17 +348,14 @@ class Settings(QDialog, Ui_Dialog):
             self.app.language = newlanguage
             self.app.load_autocomplete()
 
-
-
-
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    app.setFont(QFont("Arial", 24))
+    font = QFont("Arial", 24)
+    font.setBold(True)
+    app.setFont(font)
     win = Window()
     win.showMaximized()
     sys.exit(app.exec())
-
-
 
 # convert gui.ui to .py
 # pyuic5 gui.ui -o gui.py
