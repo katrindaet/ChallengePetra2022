@@ -86,6 +86,8 @@ class Window(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
 
+        self.savedSettings = QSettings("SuperPetra2022")
+
         # Text to speech shortcut
         keySequence = QKeySequence('Ctrl+P')
         self.enter_shortcut = QShortcut(keySequence, self)
@@ -94,6 +96,10 @@ class Window(QMainWindow, Ui_MainWindow):
         # UI setup
         self.setupUi(self)
         self.mytts = tts.TTS()
+        if self.savedSettings.value('voiceRate') is not None:
+            self.mytts.setRate(float(self.savedSettings.value('voiceRate', 1.0)))
+        if self.savedSettings.value('voiceId') is not None:
+            self.mytts.setVoice(self.savedSettings.value('voiceId'))
         self.display_font = QFont("Arial", 24)
         # set font color
         self.display_font.setBold(True)
@@ -107,7 +113,10 @@ class Window(QMainWindow, Ui_MainWindow):
         # read context from the database
         self.db = Database('sentences.json')
 
-        self.language = 'Deutsch'
+        self.language = self.savedSettings.value('language', 'Deutsch')
+
+
+
         # Load Autocomplete
         self.load_autocomplete()
 
@@ -174,6 +183,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.Setting2.setIconSize(QtCore.QSize(100, 100))
 
     def load_autocomplete(self):
+
         autocomplete_file = {
             'Deutsch': 'german_dataset_auto_complete.json',
             'English': 'english_dataset_auto_complete.json',
@@ -223,7 +233,7 @@ class Window(QMainWindow, Ui_MainWindow):
         text = self.textEdit.toPlainText()
         sentence = text.split()
         sentence.pop(-1)
-        sentence=' '.join(sentence)
+        sentence =' '.join(sentence)
         self.textEdit.clear()
         self.textEdit.append(sentence+' '+word+' ')
 
@@ -312,6 +322,7 @@ class Window(QMainWindow, Ui_MainWindow):
     def open_settings(self):
         # open the settings GUI
         self.settings = Settings(self.mytts, self)
+
         self.settings.show()
 
     def closeEvent(self, event):
@@ -334,7 +345,7 @@ class Settings(QDialog, Ui_Dialog):
 
         self.comboBox_2.addItem('Deutsch')
         self.comboBox_2.addItem('English')
-
+        self.comboBox_2.setCurrentText(app.language)
 
 
 
@@ -346,6 +357,12 @@ class Settings(QDialog, Ui_Dialog):
         if newlanguage != self.app.language:
             self.app.language = newlanguage
             self.app.load_autocomplete()
+
+        self.app.savedSettings.setValue('voiceId', self.comboBox.currentData())
+        self.app.savedSettings.setValue('voiceRate', self.horizontalSlider.value() / 100)
+        self.app.savedSettings.setValue('language', self.app.language)
+
+        self.app.savedSettings.sync()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
