@@ -4,6 +4,7 @@ import math
 
 from PyQt5 import QtCore
 from PyQt5.uic import loadUi
+from PyQt5.QtGui import QGuiApplication
 from PyQt5.QtGui import QIcon
 from PyQt5.QtGui import QFont
 from PyQt5.QtGui import QKeySequence
@@ -142,6 +143,7 @@ class Window(QMainWindow, Ui_MainWindow):
 
         self.Setting1.setIcon(QIcon(os.path.join('icons_gui', 'copy.svg')))
         self.Setting1.setIconSize(self.Setting1.size())
+        self.Setting1.clicked.connect(lambda state, self=self: QGuiApplication.clipboard().setText(self.textEdit.toPlainText()))
         
         def erase():
             self.textEdit.clear()
