@@ -250,7 +250,6 @@ class Window(QMainWindow, Ui_MainWindow):
 
     def button_initialiser(self,text):
         b = MyButton(text)
-        b.setFont(self.text_font)
         # make the button expand
         b.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         # create Qinputdialog
