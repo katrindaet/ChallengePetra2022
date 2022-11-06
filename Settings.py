@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '.\Settings.ui'
+# Form implementation generated from reading ui file 'Settings.ui'
 #
 # Created by: PyQt5 UI code generator 5.12.3
 #
@@ -26,8 +26,10 @@ class Ui_Dialog(object):
         self.comboBox.setObjectName("comboBox")
         self.formLayout_2.setWidget(5, QtWidgets.QFormLayout.FieldRole, self.comboBox)
         self.horizontalSlider = QtWidgets.QSlider(Dialog)
-        self.horizontalSlider.setMaximum(256)
+        self.horizontalSlider.setMinimum(25)
+        self.horizontalSlider.setMaximum(400)
         self.horizontalSlider.setOrientation(QtCore.Qt.Horizontal)
+        self.horizontalSlider.setTickPosition(QtWidgets.QSlider.TicksBelow)
         self.horizontalSlider.setObjectName("horizontalSlider")
         self.formLayout_2.setWidget(7, QtWidgets.QFormLayout.FieldRole, self.horizontalSlider)
         self.buttonBox = QtWidgets.QDialogButtonBox(Dialog)

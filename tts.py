@@ -52,7 +52,7 @@ class TTS:
         return self._volume
 
     def setVolume(self, volume):
-        assert 0.0 <= volume <= 1.0
+        assert 0.0 <= volume <= 1.0, "Volume must be between 0.0 and 1.0"
         self._volume = volume
         self._engine.setProperty("volume", volume)
 
@@ -60,7 +60,7 @@ class TTS:
         return self._rate_modifier
 
     def setRate(self, rate):
-        assert 0.25 <= rate <= 4.0
+        assert 0.25 <= rate <= 4.0, "Rate must be between 0.25 and 4.0"
         self._rate_modifier = rate
         self._engine.setProperty("rate", rate * self._base_rate)
 

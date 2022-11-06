@@ -38,6 +38,7 @@ class MyButton(QPushButton):
             super().mousePressEvent(QMouseEvent)
 
 
+
 class Window(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -197,8 +198,8 @@ class Window(QMainWindow, Ui_MainWindow):
         if ok:
             # set botton text
             old_text = button.text()
-            button.setText(text)
-            self.db.replace_sentence(self.current_context, old_text, button.text())
+            self.button.setText(text)
+            db.replace_sentence(self.current_context, old_text, button.text())
             # # find the old_text in self.db.sentences(self.context)
             # sentences = self.db.sentences(self.current_context)
             # for i,j in enumerate(sentences):
@@ -244,14 +245,15 @@ class Settings(QDialog, Ui_Dialog):
 
         self.tts = tts
         self.setupUi(self)
-        self.comboBox.addItems(tts.voices())
+        for voice_id, name in tts.voices().items():
+            self.comboBox.addItem(name, voice_id)
         self.comboBox.setCurrentText(tts.voiceId())
-        self.horizontalSlider.setValue(tts.rate())
+        self.horizontalSlider.setValue(100 * tts.rate())
         self.buttonBox.accepted.connect(lambda self=self: self.OK())
 
     def OK(self):
-        self.tts.setRate(self.horizontalSlider.value())
-        self.tts.setVoice(self.comboBox.currentText())
+        self.tts.setRate(self.horizontalSlider.value() / 100)
+        self.tts.setVoice(self.comboBox.currentData())
 
 
 
