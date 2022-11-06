@@ -20,24 +20,70 @@ from PyQt5.QtGui import QKeySequence
 
 # .setMaximumSize(QtCore.QSize(16777215, 80)
 
+class MyTextEdit(QTextEdit):
+    enterPressed = pyqtSignal()
+
+    def __init__(self,  *args, **kwargs):
+        super(MyTextEdit, self).__init__(*args, **kwargs)
+
+    def keyPressEvent(self, e):
+        if e.key() == Qt.Key_Enter or e.key() == Qt.Key_Return or e.key() == Qt.Key_Escape:
+            self.enterPressed.emit()
+        else:
+            super().keyPressEvent(e)
+
 class MyButton(QPushButton):
+    textChanged = pyqtSignal(str, str)
 
-    rightclick = pyqtSignal()
+    def __init__(self, text):
+        super().__init__()
 
-    def __init__(self,*args,**kwargs):
-        super().__init__(*args, **kwargs)
-        # self.setText(text)
+        self.label = QLabel(self)
+        self.label.setWordWrap(True)
+        self.label.resize(self.size())
+        self.label.setAlignment(Qt.AlignCenter)
+        self.label.setFocusPolicy(Qt.NoFocus)
+
+        self.edit = MyTextEdit(self)
+        self.edit.resize(self.size())
+        self.edit.setAlignment(Qt.AlignCenter)
+        self.edit.viewport().setAutoFillBackground(False)
+        self.edit.enterPressed.connect(lambda self=self: self.save())
+
+        self.edit.setText(text)
+        self.switchToViewMode()
+
+    def switchToEditMode(self):
+        self.edit.setText(self.label.text())
+        self.label.hide()
+        self.edit.show()
+        self.setFocusProxy(self.edit)
+
+    def switchToViewMode(self):
+        self.label.setText(self.edit.toPlainText())
+        self.label.show()
+        self.edit.hide()
+        self.setFocusProxy(None)
         
+    def resizeEvent(self, event):
+        self.label.resize(self.size())
+        self.edit.resize(self.size())
 
     def mousePressEvent(self, QMouseEvent):
         if QMouseEvent.button() == Qt.RightButton:
-            #do what you want here
-            print("Right Button Clicked")
-            self.rightclick.emit()
+            self.switchToEditMode()
         else:
             super().mousePressEvent(QMouseEvent)
 
+    def text(self):
+        return self.label.text()
 
+    def setText(self, text):
+        self.label.setText(text)
+
+    def save(self):
+        self.textChanged.emit(self.label.text(), self.edit.toPlainText())
+        self.switchToViewMode()
 
 class Window(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -61,8 +107,6 @@ class Window(QMainWindow, Ui_MainWindow):
         self.textEdit.setFont(self.display_font)
         # max size of the textedit
         self.textEdit.setMaximumSize(QtCore.QSize(16777215, 450))
-
-        
 
         # read context from the database
         self.db = Database('sentences.json')
@@ -125,7 +169,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.textEdit.cursorPositionChanged.connect(lambda: self.take_word_text_edit())
 
         # > mytts = tts.TTS()
-# > mytts.say('Hello, World')
+        # > mytts.say('Hello, World')
         # loop through Setting1 to 6 and make the button expand
         for i in range(6):
             b1 = getattr(self, "Setting" + str(i+1))
@@ -137,10 +181,16 @@ class Window(QMainWindow, Ui_MainWindow):
             b1.setMaximumWidth(300)
 
 
-        # when any botton is pressed do something
-
         # adapt size of icon
         self.Setting2.setIconSize(QtCore.QSize(100, 100))
+
+    def load_autocomplete(self):
+        autocomplete_file = {
+            'Deutsch': 'german_dataset_auto_complete.json',
+            'English': 'english_dataset_auto_complete.json',
+        }.get(self.language, 'german_dataset_auto_complete.json')
+
+        self.auto_complete = auto_complete(autocomplete_file)
 
     def resizeEvent(self, event):
         self.Setting2.setIconSize(self.Setting2.size())
@@ -158,6 +208,7 @@ class Window(QMainWindow, Ui_MainWindow):
         for i,j in enumerate(self.db.contexts()):
             b1 = self.button_initialiser(j)
             b1.clicked.connect(lambda state, b1=b1: self.layout_button_initialiser(b1.text()))
+            b1.textChanged.connect(lambda oldtext, newtext: self.db.replace_context(oldtext, newtext))
             b1.setMaximumWidth(400)
             y = i % 2
             x = math.floor(i/2)
@@ -171,6 +222,10 @@ class Window(QMainWindow, Ui_MainWindow):
         for i,j in enumerate(predicted_words):
             b1 = self.button_initialiser(j)
             b1.clicked.connect(lambda state, b1=b1: self.add_predicted_word(b1.text()))
+            b1.textChanged.connect(lambda oldtext, newtext: self.db.replace_sentence(self.current_context, oldtext, newtext))
+            if len(b1.text().split())==1: #if it is a word count for dictionary, if a sentence, pass
+                b1.clicked.connect(lambda state, b1=b1: self.auto_complete.increment_count(b1.text()))
+
             b1.setMaximumWidth(400)
             y = i % 2
             x = math.floor(i / 2)
@@ -187,13 +242,14 @@ class Window(QMainWindow, Ui_MainWindow):
     def take_word_text_edit(self):
         text = self.textEdit.toPlainText()
         try:
-            if text[-1] != ' ':
+            if not text:
+                self.layout_button_initialiser(self.current_context)
+            elif text[-1] != ' ':
                 words = text.split()
                 word_prefix = words[-1]
                 predicted_words = self.auto_complete.predict(word_prefix)
                 predicted_sentences = self.db.sentences_containing(word_prefix)
                 self.initiate_auto_complete(predicted_words + predicted_sentences)
-
             else :
                 self.layout_button_initialiser(self.current_context)
         except:
@@ -206,7 +262,6 @@ class Window(QMainWindow, Ui_MainWindow):
         b.setFont(self.text_font)
         # make the button expand
         b.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        b.rightclick.connect(lambda b=b: self.create_qinputdialog(b))
         # create Qinputdialog
         # text, ok = QInputDialog.getText(self, 'Input Dialog', 'Enter your name:')
         return b
@@ -236,6 +291,7 @@ class Window(QMainWindow, Ui_MainWindow):
             #         sentences[i] = button.text()
             #         self.db.replace_sentences(self.current_context, sentences)
             #         break
+
     def add_new_context(self):
         text, ok = QInputDialog.getText(self, 'Add new context', 'Enter text:')
         if ok:
@@ -264,16 +320,20 @@ class Window(QMainWindow, Ui_MainWindow):
 
     def open_settings(self):
         # open the settings GUI
-        self.settings = Settings(self.mytts)
+        self.settings = Settings(self.mytts, self)
         self.settings.show()
 
+    def closeEvent(self, event):
+        super().closeEvent(event)
+        self.auto_complete.save_json()
 
 class Settings(QDialog, Ui_Dialog):
-    def __init__(self, tts, parent=None):
+    def __init__(self, tts, app, parent=None):
 
         super().__init__(parent)
 
         self.tts = tts
+        self.app = app
         self.setupUi(self)
         for voice_id, name in tts.voices().items():
             self.comboBox.addItem(name, voice_id)
@@ -281,15 +341,27 @@ class Settings(QDialog, Ui_Dialog):
         self.horizontalSlider.setValue(100 * tts.rate())
         self.buttonBox.accepted.connect(lambda self=self: self.OK())
 
+        self.comboBox_2.addItem('Deutsch')
+        self.comboBox_2.addItem('English')
+
+
+
+
+
     def OK(self):
         self.tts.setRate(self.horizontalSlider.value() / 100)
         self.tts.setVoice(self.comboBox.currentData())
+        newlanguage = self.comboBox_2.currentText()
+        if newlanguage != self.app.language:
+            self.app.language = newlanguage
+            self.app.load_autocomplete()
+
 
 
 
 if __name__ == "__main__":
-
     app = QApplication(sys.argv)
+    app.setFont(QFont("Arial", 24))
     win = Window()
     win.showMaximized()
     sys.exit(app.exec())
