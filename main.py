@@ -86,17 +86,16 @@ class Window(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        # detect enter with QKeySequence
-        keySequence = QKeySequence('Ctrl+P')#Qt.Key_Enter)
+        # Text to speech shortcut
+        keySequence = QKeySequence('Ctrl+P')
         self.enter_shortcut = QShortcut(keySequence, self)
         self.enter_shortcut.activated.connect(self.play_sound)
 
+        # UI setup
         self.setupUi(self)
         self.mytts = tts.TTS()
-        self.text_font = QFont("Arial", 20)
         self.display_font = QFont("Arial", 24)
         # set font color
-        self.text_font.setBold(True)
         self.display_font.setBold(True)
 
 
@@ -246,7 +245,6 @@ class Window(QMainWindow, Ui_MainWindow):
 
     def button_initialiser(self,text):
         b = MyButton(text)
-        b.setFont(self.text_font)
         # make the button expand
         b.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         # create Qinputdialog
@@ -344,17 +342,14 @@ class Settings(QDialog, Ui_Dialog):
             self.app.language = newlanguage
             self.app.load_autocomplete()
 
-
-
-
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    app.setFont(QFont("Arial", 24))
+    font = QFont("Arial", 24)
+    font.setBold(True)
+    app.setFont(font)
     win = Window()
     win.showMaximized()
     sys.exit(app.exec())
-
-
 
 # convert gui.ui to .py
 # pyuic5 gui.ui -o gui.py
