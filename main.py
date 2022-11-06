@@ -11,6 +11,7 @@ from PyQt5.QtGui import QFont
 from GUI import Ui_MainWindow
 from Settings import Ui_Dialog
 import tts
+from auto_complete import auto_complete
 from database import Database
 # import QKeySequence
 from PyQt5.QtGui import QKeySequence
@@ -65,6 +66,7 @@ class Window(QMainWindow, Ui_MainWindow):
 
         # read context from the database
         self.db = Database('sentences.json')
+        self.auto_complete = auto_complete('english_dataset_auto_complete.json')
 
         self.current_context = self.db.contexts()[0]
         self.initiate_custom_buttons()
@@ -104,7 +106,6 @@ class Window(QMainWindow, Ui_MainWindow):
             # self.initiate_custom_buttons()
 
 
-
         # when setting1 is clicked play the content of textedit
         self.Setting2.clicked.connect(lambda state, self=self: self.play_sound())
 
@@ -119,6 +120,9 @@ class Window(QMainWindow, Ui_MainWindow):
 
         # when setting5 is clicked create new sentence
         self.Setting5.clicked.connect(lambda state, self=self: self.add_new_sentence())
+
+        # when cursor changes position in text
+        self.textEdit.cursorPositionChanged.connect(lambda: self.take_word_text_edit())
 
         # > mytts = tts.TTS()
 # > mytts.say('Hello, World')
@@ -137,7 +141,6 @@ class Window(QMainWindow, Ui_MainWindow):
         # adapt size of icon
         self.Setting2.setIconSize(QtCore.QSize(100, 100))
 
-
     def initiate_custom_buttons(self):
         # erase content of the gridlayout1
         for i in reversed(range(self.gridLayout2.count())):
@@ -152,6 +155,41 @@ class Window(QMainWindow, Ui_MainWindow):
             self.gridLayout2.addWidget(b1,x,y)
             # background color of the buttom
             # b1.setStyleSheet("background-color: rgb(0, 60, 120);")
+
+    def initiate_auto_complete(self, predicted_words):
+        for i in reversed(range(self.gridLayout1.count())):
+            self.gridLayout1.itemAt(i).widget().setParent(None)
+        for i,j in enumerate(predicted_words):
+            b1 = self.button_initialiser(j)
+            b1.clicked.connect(lambda state, b1=b1: self.add_predicted_word(b1.text()))
+            b1.setMaximumWidth(400)
+            y = i % 2
+            x = math.floor(i / 2)
+            self.gridLayout1.addWidget(b1, x, y)
+
+    def add_predicted_word(self, word):
+        text = self.textEdit.toPlainText()
+        sentence = text.split()
+        sentence.pop(-1)
+        sentence=' '.join(sentence)
+        self.textEdit.clear()
+        self.textEdit.append(sentence+' '+word+' ')
+
+    def take_word_text_edit(self):
+        text = self.textEdit.toPlainText()
+        try:
+            if text[-1] != ' ':
+                mytext = self.textEdit.toPlainText()
+                words = mytext.split()
+                word_prefix = words[-1]
+                predicted_words = self.auto_complete.predict(word_prefix=word_prefix)
+                self.initiate_auto_complete(predicted_words=predicted_words)
+            else :
+                self.layout_button_initialiser(self.current_context)
+        except:
+            pass
+
+
 
     def button_initialiser(self,text):
         b = MyButton(text)
