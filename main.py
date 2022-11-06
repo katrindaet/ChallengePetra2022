@@ -55,6 +55,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.text_font.setBold(True)
         self.display_font.setBold(True)
 
+
         # change the font of the textedit
         self.textEdit.setFont(self.display_font)
         # max size of the textedit
@@ -71,18 +72,31 @@ class Window(QMainWindow, Ui_MainWindow):
 
 
         # add icons in settings
-        icon = QIcon(".\icons_gui\delete.png")
-        self.Setting2.setIcon(icon)
-        icon = QIcon(".\icons_gui\close.png")
-        self.Setting3.setIcon(icon)
-        icon = QIcon(".\icons_gui\\frame.png")
-        self.Setting4.setIcon(icon)
-        icon = QIcon(".\icons_gui\plus.png")
-        self.Setting5.setIcon(icon)
-        icon = QIcon(".\icons_gui\settings.png")
-        self.Setting6.setIcon(icon)
+        play = QIcon(".\icons_gui\play.svg")
+        self.Setting2.setIcon(play)
+        self.Setting2.setIconSize(self.Setting2.size())
+
+        delete = QIcon(".\icons_gui\delete.svg")
+        self.Setting3.setIcon(delete)
+        self.Setting3.setIconSize(self.Setting3.size())
+
+        plus = QIcon(".\icons_gui\plus.svg")
+        self.Setting4.setIcon(plus)
+        self.Setting4.setIconSize(self.Setting4.size())
+
+        context = QIcon(".\icons_gui\context.svg")
+        self.Setting5.setIcon(context)
+        self.Setting5.setIconSize(self.Setting5.size())
+
+
+        settings = QIcon(".\icons_gui\settings.png")
+        self.Setting6.setIconSize(self.Setting6.size())
+        self.Setting6.setIcon(settings)
+
         icon = QIcon(".\icons_gui\speaker.png")
         self.Setting1.setIcon(icon)
+        self.Setting1.setIconSize(self.Setting1.size())
+
 
         
         def erase():
@@ -138,6 +152,7 @@ class Window(QMainWindow, Ui_MainWindow):
             self.gridLayout2.addWidget(b1,x,y)
             # background color of the buttom
             # b1.setStyleSheet("background-color: rgb(0, 60, 120);")
+
     def button_initialiser(self,text):
         b = MyButton(text)
         b.setFont(self.text_font)
@@ -180,6 +195,7 @@ class Window(QMainWindow, Ui_MainWindow):
 
             self.db.add_new_context(text)
             self.initiate_custom_buttons()
+
     def add_new_sentence(self):
          text, ok = QInputDialog.getText(self, 'Add new sentence', 'Enter text:')
          if ok:
