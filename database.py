@@ -15,7 +15,7 @@ class Database:
     return sentence_list  # returns a list containing all the sentences corresponding to this context
 
   def sentences_containing(self, prefix):
-    sentence_list = [sentence for sentence in itertools.chain.from_iterable(self.data['Contexts'].values()) if sentence.startswith(prefix)]
+    sentence_list = [sentence for sentence in itertools.chain.from_iterable(self.data['Contexts'].values()) if sentence.__contains__(prefix)]
     return sentence_list  #returns a list containing the sentences that start with the given prefix
 
   def replace_sentence(self, context, old_sentence, new_sentence):
