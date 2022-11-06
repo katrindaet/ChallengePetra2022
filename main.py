@@ -178,6 +178,9 @@ class Window(QMainWindow, Ui_MainWindow):
         for i,j in enumerate(predicted_words):
             b1 = self.button_initialiser(j)
             b1.clicked.connect(lambda state, b1=b1: self.add_predicted_word(b1.text()))
+            if len(b1.text().split())==1: #if it is a word count for dictionary, if a sentence, pass
+                b1.clicked.connect(lambda state, b1=b1: self.auto_complete.increment_count(b1.text()))
+
             b1.setMaximumWidth(400)
             y = i % 2
             x = math.floor(i / 2)
@@ -274,6 +277,9 @@ class Window(QMainWindow, Ui_MainWindow):
         self.settings = Settings(self.mytts, self)
         self.settings.show()
 
+    def closeEvent(self, event):
+        super().closeEvent(event)
+        self.auto_complete.save_json()
 
 class Settings(QDialog, Ui_Dialog):
     def __init__(self, tts, app, parent=None):
