@@ -329,7 +329,7 @@ class Settings(QDialog, Ui_Dialog):
         for voice_id, name in tts.voices().items():
             self.comboBox.addItem(name, voice_id)
         self.comboBox.setCurrentText(tts.voiceId())
-        self.horizontalSlider.setValue(100 * tts.rate())
+        self.horizontalSlider.setValue(int(100 * tts.rate()))
         self.buttonBox.accepted.connect(lambda self=self: self.OK())
 
         self.comboBox_2.addItem('Deutsch')
