@@ -84,7 +84,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.Setting4.setIcon(plus)
         self.Setting4.setIconSize(self.Setting4.size())
 
-        context = QIcon(".\icons_gui\context.svg")
+        context = QIcon(".\icons_gui\context.png")
         self.Setting5.setIcon(context)
         self.Setting5.setIconSize(self.Setting5.size())
 
@@ -243,7 +243,7 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
     win = Window()
-    win.show()
+    win.showMaximized()
     sys.exit(app.exec())
 
 
