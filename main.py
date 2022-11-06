@@ -1,24 +1,21 @@
+import os
 import sys
 import math
+
 from PyQt5 import QtCore
+from PyQt5.uic import loadUi
+from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
-from PyQt5.QtGui import QIcon
-from PyQt5.uic import loadUi
-# import Qfont
-from PyQt5.QtGui import QFont
+
+from auto_complete import auto_complete
 
 from GUI import Ui_MainWindow
 from Settings import Ui_Dialog
 import tts
-from auto_complete import auto_complete
 from database import Database
-# import QKeySequence
-from PyQt5.QtGui import QKeySequence
-# detect when enter is pressed
-
-
-# .setMaximumSize(QtCore.QSize(16777215, 80)
 
 class MyTextEdit(QTextEdit):
     enterPressed = pyqtSignal()
@@ -116,34 +113,24 @@ class Window(QMainWindow, Ui_MainWindow):
         self.initiate_custom_buttons()
         self.layout_button_initialiser(self.current_context)
 
-
         # add icons in settings
-        play = QIcon(".\icons_gui\play.svg")
-        self.Setting2.setIcon(play)
+        self.Setting2.setIcon(QIcon(os.path.join('icons_gui', 'play.svg')))
         self.Setting2.setIconSize(self.Setting2.size())
 
-        delete = QIcon(".\icons_gui\delete.svg")
-        self.Setting3.setIcon(delete)
+        self.Setting3.setIcon(QIcon(os.path.join('icons_gui', 'delete.svg')))
         self.Setting3.setIconSize(self.Setting3.size())
 
-        context = QIcon(".\icons_gui\context.png")
-        self.Setting4.setIcon(context)
+        self.Setting4.setIcon(QIcon(os.path.join('icons_gui', 'context.png')))
         self.Setting4.setIconSize(self.Setting4.size())
 
-        plus = QIcon(".\icons_gui\plus.svg")
-        self.Setting5.setIcon(plus)
+        self.Setting5.setIcon(QIcon(os.path.join('icons_gui', 'plus.svg')))
         self.Setting5.setIconSize(self.Setting5.size())
 
-        settings = QIcon(".\icons_gui\settings.png")
+        self.Setting6.setIcon(QIcon(os.path.join('icons_gui', 'settings.png')))
         self.Setting6.setIconSize(self.Setting6.size())
-        self.Setting6.setIcon(settings)
 
-
-        copy = QIcon(".\icons_gui\copy.svg")
-        self.Setting1.setIcon(copy)
+        self.Setting1.setIcon(QIcon(os.path.join('icons_gui', 'copy.svg')))
         self.Setting1.setIconSize(self.Setting1.size())
-
-
         
         def erase():
             self.textEdit.clear()
@@ -222,7 +209,6 @@ class Window(QMainWindow, Ui_MainWindow):
         for i,j in enumerate(predicted_words):
             b1 = self.button_initialiser(j)
             b1.clicked.connect(lambda state, b1=b1: self.add_predicted_word(b1.text()))
-            b1.textChanged.connect(lambda oldtext, newtext: self.db.replace_sentence(self.current_context, oldtext, newtext))
             if len(b1.text().split())==1: #if it is a word count for dictionary, if a sentence, pass
                 b1.clicked.connect(lambda state, b1=b1: self.auto_complete.increment_count(b1.text()))
 
@@ -273,6 +259,7 @@ class Window(QMainWindow, Ui_MainWindow):
         for i,j in enumerate(self.db.sentences(context)):
             b1 = self.button_initialiser(j)
             b1.clicked.connect(lambda state, b1=b1: self.textEdit.append(b1.text()))
+            b1.textChanged.connect(lambda oldtext, newtext: self.db.replace_sentence(self.current_context, oldtext, newtext))
             y = i % 3
             x = math.floor(i/3)
             self.gridLayout1.addWidget(b1,x,y)
