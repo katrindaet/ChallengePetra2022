@@ -1,59 +1,101 @@
+import os
 import sys
 import math
+
 from PyQt5 import QtCore
+from PyQt5.uic import loadUi
+from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
-from PyQt5.QtGui import QIcon
-from PyQt5.uic import loadUi
-# import Qfont
-from PyQt5.QtGui import QFont
+
+from auto_complete import auto_complete
 
 from GUI import Ui_MainWindow
 from Settings import Ui_Dialog
 import tts
-from auto_complete import auto_complete
 from database import Database
-# import QKeySequence
-from PyQt5.QtGui import QKeySequence
-# detect when enter is pressed
 
+class MyTextEdit(QTextEdit):
+    enterPressed = pyqtSignal()
 
-# .setMaximumSize(QtCore.QSize(16777215, 80)
+    def __init__(self,  *args, **kwargs):
+        super(MyTextEdit, self).__init__(*args, **kwargs)
+
+    def keyPressEvent(self, e):
+        if e.key() == Qt.Key_Enter or e.key() == Qt.Key_Return or e.key() == Qt.Key_Escape:
+            self.enterPressed.emit()
+        else:
+            super().keyPressEvent(e)
 
 class MyButton(QPushButton):
+    textChanged = pyqtSignal(str, str)
 
-    rightclick = pyqtSignal()
+    def __init__(self, text):
+        super().__init__()
 
-    def __init__(self,*args,**kwargs):
-        super().__init__(*args, **kwargs)
-        # self.setText(text)
+        self.label = QLabel(self)
+        self.label.setWordWrap(True)
+        self.label.resize(self.size())
+        self.label.setAlignment(Qt.AlignCenter)
+        self.label.setFocusPolicy(Qt.NoFocus)
+
+        self.edit = MyTextEdit(self)
+        self.edit.resize(self.size())
+        self.edit.setAlignment(Qt.AlignCenter)
+        self.edit.viewport().setAutoFillBackground(False)
+        self.edit.enterPressed.connect(lambda self=self: self.save())
+
+        self.edit.setText(text)
+        self.switchToViewMode()
+
+    def switchToEditMode(self):
+        self.edit.setText(self.label.text())
+        self.label.hide()
+        self.edit.show()
+        self.setFocusProxy(self.edit)
+
+    def switchToViewMode(self):
+        self.label.setText(self.edit.toPlainText())
+        self.label.show()
+        self.edit.hide()
+        self.setFocusProxy(None)
         
+    def resizeEvent(self, event):
+        self.label.resize(self.size())
+        self.edit.resize(self.size())
 
     def mousePressEvent(self, QMouseEvent):
         if QMouseEvent.button() == Qt.RightButton:
-            #do what you want here
-            print("Right Button Clicked")
-            self.rightclick.emit()
+            self.switchToEditMode()
         else:
             super().mousePressEvent(QMouseEvent)
 
+    def text(self):
+        return self.label.text()
 
+    def setText(self, text):
+        self.label.setText(text)
+
+    def save(self):
+        self.textChanged.emit(self.label.text(), self.edit.toPlainText())
+        self.switchToViewMode()
 
 class Window(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        # detect enter with QKeySequence
-        keySequence = QKeySequence('Ctrl+P')#Qt.Key_Enter)
+        # Text to speech shortcut
+        keySequence = QKeySequence('Ctrl+P')
         self.enter_shortcut = QShortcut(keySequence, self)
         self.enter_shortcut.activated.connect(self.play_sound)
 
+        # UI setup
         self.setupUi(self)
         self.mytts = tts.TTS()
-        self.text_font = QFont("Arial", 20)
         self.display_font = QFont("Arial", 24)
         # set font color
-        self.text_font.setBold(True)
         self.display_font.setBold(True)
 
 
@@ -73,34 +115,24 @@ class Window(QMainWindow, Ui_MainWindow):
         self.initiate_custom_buttons()
         self.layout_button_initialiser(self.current_context)
 
-
         # add icons in settings
-        play = QIcon(".\icons_gui\play.svg")
-        self.Setting2.setIcon(play)
+        self.Setting2.setIcon(QIcon(os.path.join('icons_gui', 'play.svg')))
         self.Setting2.setIconSize(self.Setting2.size())
 
-        delete = QIcon(".\icons_gui\delete.svg")
-        self.Setting3.setIcon(delete)
+        self.Setting3.setIcon(QIcon(os.path.join('icons_gui', 'delete.svg')))
         self.Setting3.setIconSize(self.Setting3.size())
 
-        context = QIcon(".\icons_gui\context.png")
-        self.Setting4.setIcon(context)
+        self.Setting4.setIcon(QIcon(os.path.join('icons_gui', 'context.png')))
         self.Setting4.setIconSize(self.Setting4.size())
 
-        plus = QIcon(".\icons_gui\plus.svg")
-        self.Setting5.setIcon(plus)
+        self.Setting5.setIcon(QIcon(os.path.join('icons_gui', 'plus.svg')))
         self.Setting5.setIconSize(self.Setting5.size())
 
-        settings = QIcon(".\icons_gui\settings.png")
+        self.Setting6.setIcon(QIcon(os.path.join('icons_gui', 'settings.png')))
         self.Setting6.setIconSize(self.Setting6.size())
-        self.Setting6.setIcon(settings)
 
-
-        copy = QIcon(".\icons_gui\copy.svg")
-        self.Setting1.setIcon(copy)
+        self.Setting1.setIcon(QIcon(os.path.join('icons_gui', 'copy.svg')))
         self.Setting1.setIconSize(self.Setting1.size())
-
-
         
         def erase():
             self.textEdit.clear()
@@ -165,6 +197,7 @@ class Window(QMainWindow, Ui_MainWindow):
         for i,j in enumerate(self.db.contexts()):
             b1 = self.button_initialiser(j)
             b1.clicked.connect(lambda state, b1=b1: self.layout_button_initialiser(b1.text()))
+            b1.textChanged.connect(lambda oldtext, newtext: self.db.replace_context(oldtext, newtext))
             b1.setMaximumWidth(400)
             y = i % 2
             x = math.floor(i/2)
@@ -212,10 +245,8 @@ class Window(QMainWindow, Ui_MainWindow):
 
     def button_initialiser(self,text):
         b = MyButton(text)
-        b.setFont(self.text_font)
         # make the button expand
         b.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        b.rightclick.connect(lambda b=b: self.create_qinputdialog(b))
         # create Qinputdialog
         # text, ok = QInputDialog.getText(self, 'Input Dialog', 'Enter your name:')
         return b
@@ -227,6 +258,7 @@ class Window(QMainWindow, Ui_MainWindow):
         for i,j in enumerate(self.db.sentences(context)):
             b1 = self.button_initialiser(j)
             b1.clicked.connect(lambda state, b1=b1: self.textEdit.append(b1.text()))
+            b1.textChanged.connect(lambda oldtext, newtext: self.db.replace_sentence(self.current_context, oldtext, newtext))
             y = i % 3
             x = math.floor(i/3)
             self.gridLayout1.addWidget(b1,x,y)
@@ -310,17 +342,14 @@ class Settings(QDialog, Ui_Dialog):
             self.app.language = newlanguage
             self.app.load_autocomplete()
 
-
-
-
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    app.setFont(QFont("Arial", 24))
+    font = QFont("Arial", 24)
+    font.setBold(True)
+    app.setFont(font)
     win = Window()
     win.showMaximized()
     sys.exit(app.exec())
-
-
 
 # convert gui.ui to .py
 # pyuic5 gui.ui -o gui.py
