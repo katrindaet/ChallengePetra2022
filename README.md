@@ -31,7 +31,7 @@ Umlauts are broken on Windows if the default CP1252 encoding is used. Windows 11
 
 The only known workaround is to change Windows to use UTF-8:
 
-1. Press Ctrl+r and execute `intl.cpl`.
+1. Press Win+r and execute `intl.cpl`.
 2. Select Adminstrative (Verwaltung) tab.
 3. Select "Change system locale" (Gebietsschema ändern)
 4. Check "Beta: Use Unicode UTF-8 for worldwide language support" (Beta: Unicode UTF-8 für die Unterstützung weltweiter Sprachen verwenden).
