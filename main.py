@@ -1,24 +1,21 @@
+import os
 import sys
 import math
+
 from PyQt5 import QtCore
+from PyQt5.uic import loadUi
+from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QKeySequence
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
-from PyQt5.QtGui import QIcon
-from PyQt5.uic import loadUi
-# import Qfont
-from PyQt5.QtGui import QFont
+
+from auto_complete import auto_complete
 
 from GUI import Ui_MainWindow
 from Settings import Ui_Dialog
 import tts
-from auto_complete import auto_complete
 from database import Database
-# import QKeySequence
-from PyQt5.QtGui import QKeySequence
-# detect when enter is pressed
-
-
-# .setMaximumSize(QtCore.QSize(16777215, 80)
 
 class MyTextEdit(QTextEdit):
     enterPressed = pyqtSignal()
@@ -119,34 +116,24 @@ class Window(QMainWindow, Ui_MainWindow):
         self.initiate_custom_buttons()
         self.layout_button_initialiser(self.current_context)
 
-
         # add icons in settings
-        play = QIcon(".\icons_gui\play.svg")
-        self.Setting2.setIcon(play)
+        self.Setting2.setIcon(QIcon(os.path.join('icons_gui', 'play.svg')))
         self.Setting2.setIconSize(self.Setting2.size())
 
-        delete = QIcon(".\icons_gui\delete.svg")
-        self.Setting3.setIcon(delete)
+        self.Setting3.setIcon(QIcon(os.path.join('icons_gui', 'delete.svg')))
         self.Setting3.setIconSize(self.Setting3.size())
 
-        context = QIcon(".\icons_gui\context.png")
-        self.Setting4.setIcon(context)
+        self.Setting4.setIcon(QIcon(os.path.join('icons_gui', 'context.png')))
         self.Setting4.setIconSize(self.Setting4.size())
 
-        plus = QIcon(".\icons_gui\plus.svg")
-        self.Setting5.setIcon(plus)
+        self.Setting5.setIcon(QIcon(os.path.join('icons_gui', 'plus.svg')))
         self.Setting5.setIconSize(self.Setting5.size())
 
-        settings = QIcon(".\icons_gui\settings.png")
+        self.Setting6.setIcon(QIcon(os.path.join('icons_gui', 'settings.png')))
         self.Setting6.setIconSize(self.Setting6.size())
-        self.Setting6.setIcon(settings)
 
-
-        copy = QIcon(".\icons_gui\copy.svg")
-        self.Setting1.setIcon(copy)
+        self.Setting1.setIcon(QIcon(os.path.join('icons_gui', 'copy.svg')))
         self.Setting1.setIconSize(self.Setting1.size())
-
-
         
         def erase():
             self.textEdit.clear()
