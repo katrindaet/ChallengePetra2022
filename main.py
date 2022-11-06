@@ -239,6 +239,11 @@ class Window(QMainWindow, Ui_MainWindow):
                 predicted_words = self.auto_complete.predict(word_prefix)
                 predicted_sentences = self.db.sentences_containing(word_prefix)
                 self.initiate_auto_complete(predicted_words + predicted_sentences)
+            elif text[-1] == ' ':
+                words = text.split()
+                self.auto_complete.increment_count(words[-1])
+
+
         except:
             pass
 
