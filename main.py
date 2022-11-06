@@ -11,6 +11,7 @@ from PyQt5.QtGui import QFont
 from GUI import Ui_MainWindow
 from Settings import Ui_Dialog
 import tts
+from auto_complete import auto_complete
 from database import Database
 # import QKeySequence
 from PyQt5.QtGui import QKeySequence
@@ -55,6 +56,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.text_font.setBold(True)
         self.display_font.setBold(True)
 
+
         # change the font of the textedit
         self.textEdit.setFont(self.display_font)
         # max size of the textedit
@@ -64,6 +66,7 @@ class Window(QMainWindow, Ui_MainWindow):
 
         # read context from the database
         self.db = Database('sentences.json')
+        self.auto_complete = auto_complete('english_dataset_auto_complete.json')
 
         self.current_context = self.db.contexts()[0]
         self.initiate_custom_buttons()
@@ -71,18 +74,31 @@ class Window(QMainWindow, Ui_MainWindow):
 
 
         # add icons in settings
-        icon = QIcon(".\icons_gui\delete.png")
-        self.Setting2.setIcon(icon)
-        icon = QIcon(".\icons_gui\close.png")
-        self.Setting3.setIcon(icon)
-        icon = QIcon(".\icons_gui\\frame.png")
-        self.Setting4.setIcon(icon)
-        icon = QIcon(".\icons_gui\plus.png")
-        self.Setting5.setIcon(icon)
-        icon = QIcon(".\icons_gui\settings.png")
-        self.Setting6.setIcon(icon)
-        icon = QIcon(".\icons_gui\speaker.png")
-        self.Setting1.setIcon(icon)
+        play = QIcon(".\icons_gui\play.svg")
+        self.Setting2.setIcon(play)
+        self.Setting2.setIconSize(self.Setting2.size())
+
+        delete = QIcon(".\icons_gui\delete.svg")
+        self.Setting3.setIcon(delete)
+        self.Setting3.setIconSize(self.Setting3.size())
+
+        context = QIcon(".\icons_gui\context.png")
+        self.Setting4.setIcon(context)
+        self.Setting4.setIconSize(self.Setting4.size())
+
+        plus = QIcon(".\icons_gui\plus.svg")
+        self.Setting5.setIcon(plus)
+        self.Setting5.setIconSize(self.Setting5.size())
+
+        settings = QIcon(".\icons_gui\settings.png")
+        self.Setting6.setIconSize(self.Setting6.size())
+        self.Setting6.setIcon(settings)
+
+
+        copy = QIcon(".\icons_gui\copy.svg")
+        self.Setting1.setIcon(copy)
+        self.Setting1.setIconSize(self.Setting1.size())
+
 
         
         def erase():
@@ -90,9 +106,8 @@ class Window(QMainWindow, Ui_MainWindow):
             # self.initiate_custom_buttons()
 
 
-
         # when setting1 is clicked play the content of textedit
-        self.Setting1.clicked.connect(lambda state, self=self: self.play_sound())
+        self.Setting2.clicked.connect(lambda state, self=self: self.play_sound())
 
         # when setting3 is clicked clear the textedit
         self.Setting3.clicked.connect(lambda state, self=self: erase())
@@ -105,6 +120,9 @@ class Window(QMainWindow, Ui_MainWindow):
 
         # when setting5 is clicked create new sentence
         self.Setting5.clicked.connect(lambda state, self=self: self.add_new_sentence())
+
+        # when cursor changes position in text
+        self.textEdit.cursorPositionChanged.connect(lambda: self.take_word_text_edit())
 
         # > mytts = tts.TTS()
 # > mytts.say('Hello, World')
@@ -123,7 +141,6 @@ class Window(QMainWindow, Ui_MainWindow):
         # adapt size of icon
         self.Setting2.setIconSize(QtCore.QSize(100, 100))
 
-
     def initiate_custom_buttons(self):
         # erase content of the gridlayout1
         for i in reversed(range(self.gridLayout2.count())):
@@ -138,6 +155,42 @@ class Window(QMainWindow, Ui_MainWindow):
             self.gridLayout2.addWidget(b1,x,y)
             # background color of the buttom
             # b1.setStyleSheet("background-color: rgb(0, 60, 120);")
+
+    def initiate_auto_complete(self, predicted_words):
+        for i in reversed(range(self.gridLayout1.count())):
+            self.gridLayout1.itemAt(i).widget().setParent(None)
+        for i,j in enumerate(predicted_words):
+            b1 = self.button_initialiser(j)
+            b1.clicked.connect(lambda state, b1=b1: self.add_predicted_word(b1.text()))
+            b1.setMaximumWidth(400)
+            y = i % 2
+            x = math.floor(i / 2)
+            self.gridLayout1.addWidget(b1, x, y)
+
+    def add_predicted_word(self, word):
+        text = self.textEdit.toPlainText()
+        sentence = text.split()
+        sentence.pop(-1)
+        sentence=' '.join(sentence)
+        self.textEdit.clear()
+        self.textEdit.append(sentence+' '+word+' ')
+
+    def take_word_text_edit(self):
+        text = self.textEdit.toPlainText()
+        try:
+            if text[-1] != ' ':
+                mytext = self.textEdit.toPlainText()
+                words = mytext.split()
+                word_prefix = words[-1]
+                predicted_words = self.auto_complete.predict(word_prefix=word_prefix)
+                self.initiate_auto_complete(predicted_words=predicted_words)
+            else :
+                self.layout_button_initialiser(self.current_context)
+        except:
+            pass
+
+
+
     def button_initialiser(self,text):
         b = MyButton(text)
         b.setFont(self.text_font)
@@ -162,10 +215,10 @@ class Window(QMainWindow, Ui_MainWindow):
     def create_qinputdialog(self,button):
         text, ok = QInputDialog.getText(self, 'Text Saver', 'Enter text:', QLineEdit.Normal, button.text())
         if ok:
-            # set botton text
+            # set button text
             old_text = button.text()
-            self.button.setText(text)
-            db.replace_sentence(self.current_context, old_text, button.text())
+            button.setText(text)
+            self.db.replace_sentence(self.current_context, old_text, button.text())
             # # find the old_text in self.db.sentences(self.context)
             # sentences = self.db.sentences(self.current_context)
             # for i,j in enumerate(sentences):
@@ -180,6 +233,7 @@ class Window(QMainWindow, Ui_MainWindow):
 
             self.db.add_new_context(text)
             self.initiate_custom_buttons()
+
     def add_new_sentence(self):
          text, ok = QInputDialog.getText(self, 'Add new sentence', 'Enter text:')
          if ok:
@@ -227,7 +281,7 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
     win = Window()
-    win.show()
+    win.showMaximized()
     sys.exit(app.exec())
 
 
