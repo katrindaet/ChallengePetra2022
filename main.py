@@ -37,6 +37,7 @@ class MyButton(QPushButton):
             super().mousePressEvent(QMouseEvent)
 
 
+
 class Window(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -151,9 +152,7 @@ class Window(QMainWindow, Ui_MainWindow):
         for i in reversed(range(self.gridLayout1.count())):
             self.gridLayout1.itemAt(i).widget().setParent(None)
         self.current_context = context
-        print(context)
         for i,j in enumerate(self.db.sentences(context)):
-            print(j)
             b1 = self.button_initialiser(j)
             b1.clicked.connect(lambda state, b1=b1: self.textEdit.append(b1.text()))
             y = i % 3
@@ -165,8 +164,8 @@ class Window(QMainWindow, Ui_MainWindow):
         if ok:
             # set botton text
             old_text = button.text()
-            button.setText(text)
-            self.db.replace_sentence(self.current_context, old_text, button.text())
+            self.button.setText(text)
+            db.replace_sentence(self.current_context, old_text, button.text())
             # # find the old_text in self.db.sentences(self.context)
             # sentences = self.db.sentences(self.current_context)
             # for i,j in enumerate(sentences):
