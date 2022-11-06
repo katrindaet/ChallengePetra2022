@@ -179,11 +179,11 @@ class Window(QMainWindow, Ui_MainWindow):
         text = self.textEdit.toPlainText()
         try:
             if text[-1] != ' ':
-                mytext = self.textEdit.toPlainText()
-                words = mytext.split()
+                words = text.split()
                 word_prefix = words[-1]
-                predicted_words = self.auto_complete.predict(word_prefix=word_prefix)
-                self.initiate_auto_complete(predicted_words=predicted_words)
+                predicted_words = self.auto_complete.predict(word_prefix)
+                predicted_sentences = self.db.sentences_containing(word_prefix)
+                self.initiate_auto_complete(predicted_words + predicted_sentences)
             else :
                 self.layout_button_initialiser(self.current_context)
         except:
