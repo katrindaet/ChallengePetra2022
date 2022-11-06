@@ -126,13 +126,14 @@ class Window(QMainWindow, Ui_MainWindow):
 
         # > mytts = tts.TTS()
 # > mytts.say('Hello, World')
-        # loop through Setting1 to 6 and make the botton expand
+        # loop through Setting1 to 6 and make the button expand
         for i in range(6):
             b1 = getattr(self, "Setting" + str(i+1))
             b1.setIconSize(QSize(200,200))
             # set minimum size of the button
             b1.setMinimumSize(QSize(100,100))
-            b1.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+            b1.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
+
             b1.setMaximumWidth(300)
 
 
@@ -140,6 +141,14 @@ class Window(QMainWindow, Ui_MainWindow):
 
         # adapt size of icon
         self.Setting2.setIconSize(QtCore.QSize(100, 100))
+
+    def resizeEvent(self, event):
+        self.Setting2.setIconSize(self.Setting2.size())
+        self.Setting3.setIconSize(self.Setting3.size())
+        self.Setting4.setIconSize(self.Setting4.size())
+        self.Setting5.setIconSize(self.Setting5.size())
+        self.Setting6.setIconSize(self.Setting6.size())
+        self.Setting1.setIconSize(self.Setting1.size())
 
     def initiate_custom_buttons(self):
         # erase content of the gridlayout1
@@ -195,7 +204,7 @@ class Window(QMainWindow, Ui_MainWindow):
     def button_initialiser(self,text):
         b = MyButton(text)
         b.setFont(self.text_font)
-        # make the buttom expand
+        # make the button expand
         b.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         b.rightclick.connect(lambda b=b: self.create_qinputdialog(b))
         # create Qinputdialog
