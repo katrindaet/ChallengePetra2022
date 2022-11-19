@@ -8,8 +8,15 @@ import pyttsx3
 import os
 import simpleaudio
 import tempfile
-from google.auth import exceptions
-from google.cloud import texttospeech
+
+HAS_GOOGLE = False
+try:
+    from google.auth import exceptions
+    from google.cloud import texttospeech
+
+    HAS_GOOGLE = True
+except ImportError:
+    pass
 
 
 class TTS:
@@ -19,14 +26,15 @@ class TTS:
             voice.id: voice.name for voice in self._engine.getProperty("voices")
         }
 
-        # Only add Google TTS if environment variable for authentication is set.
-        try:
-            self._google_tts_client = texttospeech.TextToSpeechClient()
-            self._play_buffer = None
-            self._voices["google-english"] = "Google Englisch"
-            self._voices["google-german"] = "Google Deutsch"
-        except exceptions.DefaultCredentialsError:
-            pass
+        if HAS_GOOGLE:
+            # Only add Google TTS if environment variable for authentication is set.
+            try:
+                self._google_tts_client = texttospeech.TextToSpeechClient()
+                self._play_buffer = None
+                self._voices["google-english"] = "Google Englisch"
+                self._voices["google-german"] = "Google Deutsch"
+            except exceptions.DefaultCredentialsError:
+                pass
 
         self._rate_modifier = 1.0
 
