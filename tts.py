@@ -54,7 +54,9 @@ class TTS:
         return self._voices
 
     def setVoice(self, voice_id):
-        assert voice_id in self._voices
+        if voice_id not in self._voices:
+            print(f"Not setting unknown voice: {voice_id}. Available: {self._voices}")
+            return
         self._voice_id = voice_id
         self._engine.setProperty("voice", voice_id)
 
@@ -62,7 +64,9 @@ class TTS:
         return self._volume
 
     def setVolume(self, volume):
-        assert 0.0 <= volume <= 1.0, "Volume must be between 0.0 and 1.0"
+        if not (0.0 <= volume <= 1.0):
+            print(f"Volume {volume} must be between 0.0 and 1.0, not updating.")
+            return
         self._volume = volume
         self._engine.setProperty("volume", volume)
 
@@ -70,7 +74,9 @@ class TTS:
         return self._rate_modifier
 
     def setRate(self, rate):
-        assert 0.25 <= rate <= 4.0, "Rate must be between 0.25 and 4.0"
+        if not (0.25 <= rate <= 4.0):
+            print(f"Rate {rate} must be between 0.25 and 4.0, not updating.")
+            return
         self._rate_modifier = rate
         self._engine.setProperty("rate", rate * self._base_rate)
 
