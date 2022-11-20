@@ -16,7 +16,9 @@ For Petra, who has a speech handicap, it is challenging to communicate via audio
 
 ### Prepare installation directory:
 
-1. Install all requirements specified in requirements.txt. Also install google-cloud-core.
+1. Install all requirements specified in requirements.txt.
+
+   If you want to use Google Cloud TTS, also install `google-cloud-core` and `google-cloud-texttospeech`.
 
 2. Create new single file installer using auto py to exe (https://github.com/brentvollebregt/auto-py-to-exe):
   * main.py file selected
@@ -28,7 +30,7 @@ For Petra, who has a speech handicap, it is challenging to communicate via audio
 
 Start main.exe in the directory.
 
-TODO: Upload and share prepared software.
+A packaged version of the software is available as github release.
 
 ### Executing program
 
