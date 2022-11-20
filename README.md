@@ -5,6 +5,8 @@ This is the git for the code used and developped for Petra's Challenge at the Ha
 ## Description
 For Petra, who has a speech handicap, it is challenging to communicate via audio channels in todays ubiquitous media for both workplace and private settings. Especially in the workplace context, claiming a professional stance towards previously unacquainted peers or customers is difficult. The goal of this project is to develop a software for professional call management with a natural Text-to-Speech engine that easily integrates into today`s professional collaboration solutions like MS Teams etc.
 
+![Screenshot of the application](screenshot.PNG)
+
 ## Getting Started
 
 ### Dependencies
